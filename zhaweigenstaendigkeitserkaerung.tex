@@ -1,0 +1,223 @@
+\documentclass[10pt,a4paper,titlepage,twoside,ngerman]{zhawreprt}
+\usepackage{layout}
+\setdefaultlanguage{german}
+
+\RequirePackage{lscape}
+\usepackage{pgfgantt}
+\usepackage{xcolor}
+	\definecolor{lgray}{RGB}{250,250,250}
+	\definecolor{lgreen}{RGB}{63,127,95}
+	\definecolor{lred}{RGB}{127,0,85}
+	\definecolor{lblue}{RGB}{42,0,255}
+\usepackage{listings}
+	\lstdefinestyle{basestyle}{
+		basicstyle=\small\ttfamily,
+		breakatwhitespace = true,
+		tabsize = 4,
+		frame = double,
+		numbers = left,
+		numbersep = 10pt,
+		numberstyle = {\tiny\emptyaccsupp},
+%		firstnumber = auto,
+		numberblanklines = true,
+		captionpos = b,
+		columns = fullflexible,
+		extendedchars = true,
+		float = ht,
+		showtabs = false,
+		showspaces=false,
+		showstringspaces=false,
+		breaklines=true,
+%		prebreak=\Righttorque
+		backgroundcolor=\color{lgray},
+		keywordstyle=\color{lred}\bfseries,
+		commentstyle=\color{lgreen}\ttfamily,
+%		morekeywords={printstr, printhexln},
+		stringstyle=\color{lblue},
+		xleftmargin = \fboxsep,
+		xrightmargin = -6pt,
+		showstringspaces=true,
+	}
+\newcommand{\setlistingCSharp}{
+	\lstset{
+	style = basestyle,
+	language = [Sharp]C,
+	%otherkeywords = {*,<,>,=,;,\{,\}},
+	%deletekeywords = {...},
+}}
+\newcommand{\setlistingCpp}{
+	\lstset{
+	style = basestyle,
+	language = C++,
+	%otherkeywords = {*,<,>,=,;,\{,\}},
+	%deletekeywords = {...},
+}}
+\newcommand{\setlistingJava}{
+	\lstset{
+	style = basestyle,
+	language = Java,
+	%otherkeywords = {*,<,>,=,;,\{,\}},
+	%deletekeywords = {...},
+}}
+\newcommand{\setlistingLaTeX}{
+	\lstset{
+	style = basestyle,
+	language = TeX,
+	%otherkeywords = {*,<,>,=,;,\{,\}},
+	%deletekeywords = {...},
+}}
+\newcommand{\setlistingMatlab}{
+	\lstset{
+	style = basestyle,
+	language = Matlab,
+	otherkeywords = {methods,enumeration,properties,classdef,Sealed,Abstract},
+	%deletekeywords = {...},
+}}
+\usepackage{xstring}
+\newcommand{\inlist}[2]{
+\IfSubStr{,#2,}{,\arabic{#1},}{\color{lgray!95!blue}}{\color{lgray}}
+}
+\usepackage{lstlinebgrd}
+\makeatletter
+\renewcommand{\lst@linebgrd}{%
+\ifx\lst@linebgrdcolor\empty\else
+	\rlap{%
+		\lst@basicstyle
+		\color{lgray}
+		\lst@linebgrdcolor{%
+			\kern-\dimexpr\lst@linebgrdsep\relax%
+			\lst@linebgrdcmd{\lst@linebgrdwidth}{\lst@linebgrdheight}{\lst@linebgrddepth }%
+		}%
+	}%
+\fi}
+\makeatother
+\usepackage[space=true]{accsupp}
+\newcommand\emptyaccsupp[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}
+
+\usepackage{rotating}
+\usepackage{mathptmx}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage[squaren]{SIunits}
+\usepackage{colortbl}
+\usepackage{tabularx}
+\usepackage{lmodern}
+\usepackage{longtable}
+\usepackage{pgf,tikz}
+	\usetikzlibrary{shapes}
+	\usetikzlibrary{shapes.geometric}
+	\usetikzlibrary{shapes.arrows}
+	\usetikzlibrary{positioning}
+	\usetikzlibrary{fit}
+	\usetikzlibrary{calc}
+	\usetikzlibrary{patterns}
+\usepackage{pgfplots}
+	\pgfplotsset{compat=1.13}
+\usepackage{array}
+\usepackage[super,square]{natbib}
+\usepackage{usecases}
+\usepackage{footnote}
+	\makesavenoteenv{description}
+\usepackage[acronym,section=section]{glossaries}
+	\renewcommand*{\glsentryfmt}{\ifglsused{\glslabel}{\glsentryname{\glslabel}}{\glsentrydesc{\glslabel}\space(\glsentryname{\glslabel})}}
+\usepackage{varioref}
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, plainpages=false, unicode, pdfencoding=auto]{hyperref}
+\usepackage{cleveref}
+
+
+\logofilename{images/logos/SoE/de/de-soe-cmyk.png}
+\project{Projektarbeit}
+\projecttype{PA}
+\major{HS16 Studiengang Informatik}
+\title{ZHAW Test}
+\author{Raphael Emberger}
+\authors{Raphael Emberger}
+\mainreferee{}
+\referee{}
+\industrypartner{}
+\extreferee{}
+\setdate{\today}
+
+
+
+
+
+\usepackage{pdfpages}
+
+\makeatletter
+\renewcommand*{\sls@headabove@linethickness}{0pt}
+\renewcommand*{\sls@headbelow@linethickness}{0pt}
+\renewcommand*{\sls@footabove@linethickness}{0pt}
+\renewcommand*{\sls@footbelow@linethickness}{0pt}
+\makeatother
+
+\newpairofpagestyles[scrheadings]{declaration}{
+\lohead{}
+\cohead{\leftmark}
+\rohead{\rightmark}
+\lehead{}
+\cehead{\leftmark}
+\rehead{\rightmark}
+\lofoot{}
+\cofoot{}
+\rofoot{\pagemark}
+\lefoot{}
+\cefoot{}
+\refoot{\pagemark}
+}
+%\pagestyle{scrheadings}
+
+%\tikz[remember picture, overlay]{\filldraw[draw=blue,fill=blue!10!white] (current page.north west) rectangle(2,-1);
+\DeclareNewLayer[
+  background,
+  topmargin,
+  oddpage,
+  contents={\tikz[remember picture,overlay]{\node[anchor=north west,inner sep=0pt] (zhaw) at (1,-0.7) {\includegraphics[height=2.7cm]{\thelogofilename}};}}
+]{top.odd}
+\DeclareNewLayer[
+  clone=top.odd,
+  evenpage,
+  %contents={\includegraphics[height=4cm]{\thelogofilename}}
+]{top.even}
+\DeclareNewLayer[
+  background,
+  bottommargin,
+  oddpage,
+  contents={\color{blue!70!green!40!white}\footnotesize\normalfont\qquad\textbf{Zurich University of Applied Sciences}}
+]{bottom.odd}
+\DeclareNewLayer[
+  clone=bottom.odd,
+  evenpage,
+]{bottom.even}
+\AddLayersToPageStyle{declaration}{top.odd,top.even,bottom.odd,bottom.even}
+
+\begin{document}
+\thispagestyle{declaration}
+%[pagecommand={\includegraphics[height=4cm]{\thelogofilename}}]
+%\includepdf[pagecommand={%
+\vspace*{1.6cm}
+\section*{Erklärung betreffend das selbstständige Verfassen einer Projektarbeit an der School of Engineering}
+\vspace{1.2cm}
+Mit der Abgabe dieser Projektarbeit versichert der/die Studierende, dass er/sie die Arbeit selbständig und ohne fremde Hilfe verfasst hat. (Bei Gruppenarbeiten gelten die Leistungen der übrigen Gruppenmitglieder nicht als fremde Hilfe.)
+\vspace{1em}\noindent\\
+Der/die unterzeichnende Studierende erklärt, dass alle zitierten Quellen (auch Internetseiten) im Text oder Anhang korrekt nachgewiesen sind, d.h. dass die Projektarbeit keine Plagiate enthält, also keine Teile, die teilweise oder vollständig aus einem fremden Text oder einer fremden Arbeit unter Vorgabe der eigenen Urheberschaft bzw. ohne Quellenangabe übernommen worden sind.
+\vspace{1em}\noindent\\
+\textcolor{red}{Bei Verfehlungen aller Art treten die Paragraphen 39 und 40 (Unredlichkeit und Verfahren bei Unredlichkeit) der ZHAW Prüfungsordnung sowie die Bestimmungen der Disziplinarmassnahmen der Hochschulordnung in Kraft.}\\
+\vskip 2.8cm
+\begin{minipage}[t]{0.45\textwidth}
+Ort, Datum:\vspace{2em}\\
+\vspace{2em}\dotfill
+\end{minipage}\hfill
+\begin{minipage}[t]{0.45\textwidth}
+Unterschriften:\vspace{2em}\\
+\vspace{2em}\dotfill\\
+\vspace{2em}\dotfill\\
+\vspace{2em}\dotfill
+\end{minipage}
+\vfill
+Das Original dieses Formulars ist bei der ZHAW-Version aller abgegebenen Projektarbeiten zu Beginn der Dokumentation nach dem Abstract bzw. dem Management Summary mit Original-Unterschriften und -Datum (keine Kopie) einzufügen.
+%}]{images/Erklaerung_\theprojecttype.pdf}
+%\newpage
+%\thispagestyle{declaration}
+%\tikz[overlay]{\draw[red] (0,0) --(1,0);}
+\end{document}

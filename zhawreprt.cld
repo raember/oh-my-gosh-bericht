@@ -1,0 +1,36 @@
+%%
+%% This is file `zhawreprt.cls',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% zhawreprt.dtx  (with options: `class')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from zhawreprt.cls.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file zhawreprt.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%% File: zhawreprt.dtx  Copyright (C) 2016--2021  Raphael Emberger
+%% $Id: zhawreprt.dtx,v 1.0 2016/08/23 10:51:00 m Rel $
+%% $Version: 1.0 $
+
+\ProvidesClass{zhawreprt}[2016/08/23 v 1.0 ZHAW style class]
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}% or whatever
+\ProcessOptions\relax
+%
+\LoadClass[% the default options
+]{book}
+\RequirePackage{xcolors}
+\RequirePackage{...}
+...
+\endinput
