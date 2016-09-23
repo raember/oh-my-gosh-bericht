@@ -1,0 +1,63 @@
+%%	build-queue:
+%%	
+%%	xelatex
+%%	makeglossaries
+%%	makeindex
+%%	xelatex
+%%	bibtex
+%%	xelatex
+%%	xelatex
+%%	
+
+\RequirePackage[l2tabu,orthodox]{nag}
+\documentclass[10pt,a4paper,titlepage,twoside,german]{zhawreprt}
+
+\include{packages}
+\if false
+\include{glossaryentries}
+\fi
+
+\logofilename{images/logos/SoE/de/de-soe-cmyk.png}
+\projecttype{PA}
+\major{HS16 Studiengang Informatik}
+\title{Pflichtenheft Spaghetti}
+\shorttitle{Pflichtenheft Spaghetti}
+\author{Raphael Emberger}
+\authors{Raphael Emberger, Kal-El,\\Musashi Miyamoto}
+\mainreferee{}
+\referee{}
+\industrypartner{}
+\extreferee{}
+\setdate{\today}
+
+\newcommand{\AddRequirement}[4]{
+\textbf{#1/#2/ - #3:}\\
+#4
+}
+\newcommand{\AddFRequirement}[3]{
+\AddRequirement{F}{#1}{#2}{#3}
+}
+\newcommand{\AddNonFRequirement}[3]{
+\AddRequirement{R}{#1}{#2}{#3}
+}
+\newcommand{\AddTestRequirement}[3]{
+\AddRequirement{T}{#1}{#2}{#3}
+}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\chapter{Einleitung}\label{chp:Introduction}
+\chapter{Zielbestimmungen}\label{chp:DefinitionOfGoals}
+\section{Musskriterien}\label{sec:MustCriteria}
+\section{Wunschkriterien}\label{sec:WishCriteria}
+\section{Abgrenzungskriterien}\label{sec:DistinctionCriteria}
+\chapter{Produkteinsatz}\label{chp:ProductApplication}
+\section{Musskriterien}\label{sec:MustCriteria}
+\section{Wunschkriterien}\label{sec:WishCriteria}
+\chapter{Verzeichnisse}\label{chp:Index}
+\printglossary\label{sec:Glossar}
+\newpage
+\bibliography{reference}\label{sec:Bibliography}
+\end{document}
