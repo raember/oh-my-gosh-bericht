@@ -126,7 +126,6 @@
 
 
 \logofilename{images/logos/SoE/de/de-soe-cmyk.png}
-\project{Projektarbeit}
 \projecttype{PA}
 \major{HS16 Studiengang Informatik}
 \title{ZHAW Test}
@@ -138,10 +137,6 @@
 \extreferee{}
 \setdate{\today}
 
-
-
-
-
 \usepackage{pdfpages}
 
 \makeatletter
@@ -151,50 +146,8 @@
 \renewcommand*{\sls@footbelow@linethickness}{0pt}
 \makeatother
 
-\newpairofpagestyles[scrheadings]{declaration}{
-\lohead{}
-\cohead{\leftmark}
-\rohead{\rightmark}
-\lehead{}
-\cehead{\leftmark}
-\rehead{\rightmark}
-\lofoot{}
-\cofoot{}
-\rofoot{\pagemark}
-\lefoot{}
-\cefoot{}
-\refoot{\pagemark}
-}
-%\pagestyle{scrheadings}
-
-%\tikz[remember picture, overlay]{\filldraw[draw=blue,fill=blue!10!white] (current page.north west) rectangle(2,-1);
-\DeclareNewLayer[
-  background,
-  topmargin,
-  oddpage,
-  contents={\tikz[remember picture,overlay]{\node[anchor=north west,inner sep=0pt] (zhaw) at (1,-0.7) {\includegraphics[height=2.7cm]{\thelogofilename}};}}
-]{top.odd}
-\DeclareNewLayer[
-  clone=top.odd,
-  evenpage,
-  %contents={\includegraphics[height=4cm]{\thelogofilename}}
-]{top.even}
-\DeclareNewLayer[
-  background,
-  bottommargin,
-  oddpage,
-  contents={\color{blue!70!green!40!white}\footnotesize\normalfont\qquad\textbf{Zurich University of Applied Sciences}}
-]{bottom.odd}
-\DeclareNewLayer[
-  clone=bottom.odd,
-  evenpage,
-]{bottom.even}
-\AddLayersToPageStyle{declaration}{top.odd,top.even,bottom.odd,bottom.even}
-
 \begin{document}
 \thispagestyle{declaration}
-%[pagecommand={\includegraphics[height=4cm]{\thelogofilename}}]
-%\includepdf[pagecommand={%
 \vspace*{1.6cm}
 \section*{Erklärung betreffend das selbstständige Verfassen einer Projektarbeit an der School of Engineering}
 \vspace{1.2cm}
@@ -216,8 +169,4 @@ Unterschriften:\vspace{2em}\\
 \end{minipage}
 \vfill
 Das Original dieses Formulars ist bei der ZHAW-Version aller abgegebenen Projektarbeiten zu Beginn der Dokumentation nach dem Abstract bzw. dem Management Summary mit Original-Unterschriften und -Datum (keine Kopie) einzufügen.
-%}]{images/Erklaerung_\theprojecttype.pdf}
-%\newpage
-%\thispagestyle{declaration}
-%\tikz[overlay]{\draw[red] (0,0) --(1,0);}
 \end{document}
