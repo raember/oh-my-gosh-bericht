@@ -30,32 +30,34 @@
 \extreferee{}
 \setdate{\today}
 
-\newcommand{\AddRequirement}[4]{
-\textbf{#1/#2/ - #3:}\\
-#4
+\newcommand{\AddRequirement}[3]{
+\textbf{#1/#2/ - #3:}
 }
-\newcommand{\AddFRequirement}[3]{
-\AddRequirement{F}{#1}{#2}{#3}
+\newcommand{\AddFRequirement}[2]{
+\AddRequirement{F}{#1}{#2}
 }
-\newcommand{\AddNonFRequirement}[3]{
-\AddRequirement{R}{#1}{#2}{#3}
+\newcommand{\AddNonFRequirement}[2]{
+\AddRequirement{R}{#1}{#2}
 }
-\newcommand{\AddTestRequirement}[3]{
-\AddRequirement{T}{#1}{#2}{#3}
+\newcommand{\AddTestRequirement}[2]{
+\AddRequirement{T}{#1}{#2}
 }
 
 \begin{document}
 \maketitle
 \tableofcontents
-
 \chapter{Einleitung}\label{chp:Introduction}
 \chapter{Zielbestimmungen}\label{chp:DefinitionOfGoals}
 \section{Musskriterien}\label{sec:MustCriteria}
 \section{Wunschkriterien}\label{sec:WishCriteria}
 \section{Abgrenzungskriterien}\label{sec:DistinctionCriteria}
 \chapter{Produkteinsatz}\label{chp:ProductApplication}
-\section{Musskriterien}\label{sec:MustCriteria}
-\section{Wunschkriterien}\label{sec:WishCriteria}
+\section{Anwendungsbereiche}\label{sec:FieldOfApplience}
+\section{Benutzergruppen des Produktes}\label{sec:TargetAudience}
+\chapter{Funktionale Anforderungen}\label{chp:FunctionalRequirements}
+\chapter{Funktionsbaum}\label{chp:FunctionTree}
+\chapter{Nicht-Funktionale Anforderungen}\label{chp:NonFunctionalRequirements}
+\chapter{Abnahmekriterien Anforderungen}\label{chp:TestRequirements}
 \chapter{Verzeichnisse}\label{chp:Index}
 \printglossary\label{sec:Glossar}
 \newpage
