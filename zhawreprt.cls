@@ -82,6 +82,7 @@
 \def\zhaw@industrypartner{}\newcommand{\industrypartner}[1]{\def\zhaw@industrypartner{#1}}
 \def\zhaw@extreferee{}\newcommand{\extreferee}[1]{\def\zhaw@extreferee{#1}}
 \def\zhaw@date{}\newcommand{\setdate}[1]{\def\zhaw@date{#1}}
+\newcommand{\renameindex}{\if@german\renewcommand{\indexname}{Stichwortverzeichnis}\else\renewcommand{\indexname}{Index}\fi}
 
 
 \setlength{\headheight}{50pt}

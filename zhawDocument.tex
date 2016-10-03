@@ -1,12 +1,15 @@
 %%	build-queue:
 %%	
-%%	xelatex
-%%	makeglossaries
-%%	makeindex
-%%	xelatex
-%%	bibtex
-%%	xelatex
-%%	xelatex
+%%	¦¦¦ very first run. No .ist files yet
+%%	¦¦	index, citation/bibliography or glossary changed
+%%	¦	every change apart from the above mentioned. Double run for labels and toc.
+%%	
+%%	¦¦¦xelatex
+%%	¦¦makeglossaries
+%%	¦¦makeindex
+%%	¦¦bibtex
+%%	¦xelatex
+%%	¦xelatex
 %%	
 
 \RequirePackage[l2tabu,orthodox]{nag}
@@ -17,19 +20,7 @@
 \include{glossaryentries}
 \fi
 
-\logofilename{images/logos/SoE/de/de-soe-cmyk.png}
-\projecttype{PA}
-\major{HS16 Studiengang Informatik}
-\title{Spaghetti Bolognese mit Parmesan}
-\shorttitle{Spaghetti}
-\author{Raphael Emberger}
-\authors{Raphael Emberger, Kal-El,\\Musashi Miyamoto}
-\mainreferee{}
-\referee{}
-\industrypartner{}
-\extreferee{}
-\setdate{\today}
-
+\include{zhawSetup}
 
 \begin{document}
 
@@ -102,16 +93,17 @@ Wie in \cite[Kapitel~2, Seite~215]{DahmenReusken2008} nachzulesen, gibt es sogen
 \newpage
 \printglossary\label{sec:Glossar}
 \newpage
-\nelistoffigures
-\nelistoftables
-\lstlistoflistings
+\listoffigures\label{sec:ListOfFigures}
 \newpage
-\printglossary[type=symbols]
+\listoftables\label{sec:ListOfTables}
 \newpage
-\printglossary[title=Abkürzungsverzeichnis,type=\acronymtype]
+\lstlistoflistings\label{sec:ListOfListings}
 \newpage
-\renewcommand{\indexname}{Stichwortverzeichnis}
-\printtheindex
+\printglossary[type=symbols]\label{sec:SymbolGlossary}
+\newpage
+\printglossary[title=Abkürzungsverzeichnis,type=\acronymtype]\label{sec:AcronymGlossary}
+\newpage
+\printindex\label{sec:Index}
 
 \appendix
 \chapter{Anhang}\label{chp:Appendix}

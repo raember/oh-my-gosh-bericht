@@ -127,63 +127,58 @@
 	\makeindex
 \usepackage[nottoc]{tocbibind}
 \makeatletter
-\if@inltxdoc\else
-  \renewenvironment{theindex}%
-    {\if@twocolumn
-       \@restonecolfalse
-     \else
-       \@restonecoltrue
-     \fi
-     \if@bibchapter
-        \if@donumindex
-          \refstepcounter{section}
-          \twocolumn[\vspace*{2\topskip}%
-                     \@makechapterhead{\indexname}]%
-          \addcontentsline{toc}{section}{\protect\numberline{\thesection}\indexname}
-          \sectionmark{\indexname}
-        \else
-          \if@dotocind
-            \twocolumn[\vspace*{2\topskip}%
-                       \@makeschapterhead{\indexname}]%
-            \prw@mkboth{\indexname}
-            \addcontentsline{toc}{section}{\protect\numberline{\thesection}\indexname}
-          \else
-            \twocolumn[\vspace*{2\topskip}%
-                       \@makeschapterhead{\indexname}]%
-            \prw@mkboth{\indexname}
-          \fi
-        \fi
-     \else
-        \if@donumindex
-          \twocolumn[\vspace*{-1.5\topskip}%
-                     \@nameuse{\@tocextra}{\indexname}]%
-          \csname \@tocextra mark\endcsname{\indexname}
-        \else
-          \if@dotocind
-            \twocolumn[\vspace*{-1.5\topskip}%
-                       \toc@headstar{\@tocextra}{\indexname}]%
-            \prw@mkboth{\indexname}
-            \addcontentsline{toc}{\@tocextra}{\indexname}
-          \else
-            \twocolumn[\vspace*{-1.5\topskip}%
-                       \toc@headstar{\@tocextra}{\indexname}]%
-            \prw@mkboth{\indexname}
-          \fi
-        \fi
-     \fi
-   \thispagestyle{plain}\parindent\z@
-   \parskip\z@ \@plus .3\p@\relax
-   \let\item\@idxitem}
-   {\if@restonecol\onecolumn\else\clearpage\fi}
-\fi
+	\if@inltxdoc\else
+	  \renewenvironment{theindex}%
+	    {\if@twocolumn
+	       \@restonecolfalse
+	     \else
+	       \@restonecoltrue
+	     \fi
+	     \if@bibchapter
+	        \if@donumindex
+	          \refstepcounter{section}
+	          \twocolumn[\vspace*{2\topskip}%
+	                     \@makechapterhead{\indexname}]%
+	          \addcontentsline{toc}{section}{\protect\numberline{\thesection}\indexname}
+	          \sectionmark{\indexname}
+	        \else
+	          \if@dotocind
+	            \twocolumn[\vspace*{2\topskip}%
+	                       \@makeschapterhead{\indexname}]%
+	            \prw@mkboth{\indexname}
+	            \addcontentsline{toc}{section}{\protect\numberline{\thesection}\indexname}
+	          \else
+	            \twocolumn[\vspace*{2\topskip}%
+	                       \@makeschapterhead{\indexname}]%
+	            \prw@mkboth{\indexname}
+	          \fi
+	        \fi
+	     \else
+	        \if@donumindex
+	          \twocolumn[\vspace*{-1.5\topskip}%
+	                     \@nameuse{\@tocextra}{\indexname}]%
+	          \csname \@tocextra mark\endcsname{\indexname}
+	        \else
+	          \if@dotocind
+	            \twocolumn[\vspace*{-1.5\topskip}%
+	                       \toc@headstar{\@tocextra}{\indexname}]%
+	            \prw@mkboth{\indexname}
+	            \addcontentsline{toc}{\@tocextra}{\indexname}
+	          \else
+	            \twocolumn[\vspace*{-1.5\topskip}%
+	                       \toc@headstar{\@tocextra}{\indexname}]%
+	            \prw@mkboth{\indexname}
+	          \fi
+	        \fi
+	     \fi
+	   \thispagestyle{plain}\parindent\z@
+	   \parskip\z@ \@plus .3\p@\relax
+	   \let\item\@idxitem}
+	   {\if@restonecol\onecolumn\else\clearpage\fi}
+	\fi
 \makeatother
-%\usepackage{imakeidx}
-%	\indexsetup{level=\section}
-%	\makeindex[intoc]
-%\usepackage[totoc]{idxlayout}
 \usepackage{etoolbox}
-
-	\makeatletter
+\makeatletter
 	\renewcommand\listoftables{%
 	    \section{Tabellenverzeichnis}%
 	    \@mkboth{\MakeUppercase\listtablename}%
@@ -221,23 +216,27 @@
 	     {\def\@noitemerr
 	       {\@latex@warning{Empty `thebibliography' environment}}%
 	      \endlist}
+\makeatother
 	
-	\AtEndEnvironment{figure}{\gdef\there@is@a@figure{}}
-	\AtEndEnvironment{table}{\gdef\there@is@a@table{}}
-	\AtEndDocument{\ifdefined\there@is@a@figure\label{fig:was:used:in:doc}\fi%
-					\ifdefined\there@is@a@table{tbl:was:used:in:doc}\fi}
-	\newcommand{\nelistoffigures}{\@ifundefined{r@fig:was:used:in:doc}{}{\listoffigures\label{sec:ListOfFigures}\newpage}}
-	\newcommand{\nelistoftables}{\@ifundefined{r@tbl:was:used:in:doc}{}{\listoftables\label{sec:ListOfTables}\newpage}}
-	\makeatother
-
-
-\renewcommand\appendixname{Appendix}
-
+	\renewcommand\appendixname{Appendix}
 \makeatletter
-\newcommand{\printtheindex}{\let\ps@plainorig\ps@plain%
-\let\ps@plain\ps@scrheadings%
-\printindex\label{sec:Index}%
-\let\ps@plain\ps@plainorig}
+	\renewenvironment{theindex}{
+		\renameindex
+		\let\ps@plainorig\ps@plain
+		\let\ps@plain\ps@scrheadings
+		\if@twocolumn
+			\@restonecolfalse
+		\else
+			\@restonecoltrue
+		\fi
+		\columnseprule \z@
+		\columnsep 35\p@
+		\twocolumn[\section{\indexname}]%
+		\@mkboth{\MakeUppercase\indexname}{\MakeUppercase\indexname}%
+		\thispagestyle{plain}\parindent\z@
+		\parskip\z@ \@plus .3\p@\relax
+	\let\item\@idxitem}
+	{\if@restonecol\onecolumn\else\clearpage\fi}
 \makeatother
 
 \usepackage{varioref}

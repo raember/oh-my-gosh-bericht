@@ -1,8 +1,11 @@
 %%	build-queue:
 %%	
-%%	xelatex
-%%	xelatex
-%%	xelatex
+%%	¦¦¦ very first run. No .ist files yet
+%%	¦¦	index, citation/bibliography or glossary changed
+%%	¦	every change apart from the above mentioned. Double run for labels and toc.
+%%	
+%%	¦xelatex
+%%	¦xelatex
 %%	
 
 \RequirePackage[l2tabu,orthodox]{nag}
@@ -13,18 +16,7 @@
 \include{glossaryentries}
 \fi
 
-\logofilename{images/logos/SoE/de/de-soe-cmyk.png}
-\projecttype{PA}
-\major{HS16 Studiengang Informatik}
-\title{Pflichtenheft Spaghetti}
-\shorttitle{Pflichtenheft Spaghetti}
-\author{Raphael Emberger}
-\authors{Raphael Emberger, Kal-El,\\Musashi Miyamoto}
-\mainreferee{}
-\referee{}
-\industrypartner{}
-\extreferee{}
-\setdate{\today}
+\include{zhawSetup}
 
 \begin{document}
 \begin{landscape}
