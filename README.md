@@ -24,11 +24,40 @@ It also provides the user with new or modified commands such as:
 ## zhawDocument.tex
 This is the document of interest. It basically holds all the documentation for the project in it. Parts that are not needed can easily be commented out.
 
+## zhawSetup.tex
+This is the setup for all the documents. It holds the information regarding authors, title, logo etc.
+
 ## zhawFunctionalSpecificationDocument.tex
-This document provides basic commands to build up the functional specifications(FSD).
+This document provides basic commands to build up the functional specifications(FSD). There are additional commands:
+- `\AddRequirement{...}` - formats a requirement.
+- `\AddFRequirement{...}` - adds a functional requirement(F###).
+- `\AddNonFRequirement{...}` - adds a non-functional requirement(R###).
+- `\AddTestRequirement{...}` - adds a test requirement(T###).
 
 ## zhawGanttDiagram.tex
 This here provides a template for a Gantt diagram.
 
 ## zhawNetworkPlan.tex
-The network plan is the following step after the FSD.
+The network plan is the following step after the FSD. There are additional commands as well:
+- `\NewMainNode{newNodeName}{position}{text}` - Very first node to be placed in a tree.
+  - `newNodeName` - name to be used for the label of the node.
+  - `position` - coordinates or coordinate label to place the node at.
+  - `text` - text to be placed inside the node.
+- `\AddMainNode{newNodeName}{parentNode}{xOffset}{yOffset}{text}` - Place a main node in relation to another node and connect with an arrow.
+  - `newNodeName` - name to be used for the label of the node.
+  - `parentNode` - label of the anchor node.
+  - `xOffset` - offset of the new node on the x-axis.
+  - `yOffset` - offset of the new node on the y-axis.
+  - `text` - text to be placed inside the node.
+- `\CreateNodeOffset{newLabel}{parentNode}` - creates an offset coordinate to let the arrow start on the center of the bottom.
+  - `newLabel` - name to be used for the new coordinate.
+  - `parentNode` - label of the anchor node.
+- `\NewSubNode{newNodeName}{parentNode}{text}` - Make a subnode below a parent node.
+  - `newNodeName` - name to be used for the label of the node.
+  - `position` - coordinates or coordinate label to place the node at.
+  - `text` - text to be placed inside the node.
+- `\AddSubNode{newNodeName}{parentNode}{belowSubNode}{text}`- places a subnode below a previous subnode.
+  - `newNodeName` - name to be used for the label of the node.
+  - `position` - coordinates or coordinate label to place the node at.
+  - `belowSubNode` - label of the previous subnode.
+  - `text` - text to be placed inside the node.
