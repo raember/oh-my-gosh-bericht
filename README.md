@@ -9,8 +9,6 @@ This is the documentclass for zhaw documents. It formats the document and loads 
 It also provides the user with new or modified commands such as:
 - `\maketitle` - modified title page using the zhaw standard.
 - `\makedeclarationoforiginality` - prints the language specific declaration of originality.
-- `\printtheindex` - alternative to the original `\printindex` fixing the hierarchy of the index.
-- `\nelistoffigures` and `\nelistoftables` - they only print the list if such labels exist in the first place.
 - `\notes{...}` - print grey colored notes on the pdf. They disappear when the package option flag `final` was set.
 - `\logofilename{...}` - sets the path of the desired logo. Browser the `./images/logos/` folder for all the possible logos.
 - `\projecttype{...}` - either `PA`(project work) or `BA`(bachelor's thesis). Affects the title and the declaration of orginality.
