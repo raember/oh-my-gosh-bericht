@@ -1,0 +1,62 @@
+%%	build-queue:
+%%	
+%%	¦¦¦ very first run. No .ist files yet
+%%	¦¦	index, citation/bibliography or glossary changed
+%%	¦	every change apart from the above mentioned. Double run for labels and toc.
+%%	
+%%	¦¦¦xelatex
+%%	¦¦makeglossaries
+%%	¦¦makeindex
+%%	¦¦bibtex
+%%	¦xelatex
+%%	¦xelatex
+%%	
+
+\RequirePackage[l2tabu,orthodox]{nag}
+\documentclass[10pt,a4paper,twoside,english,minutes]{zhawreprt}
+
+\include{packages}
+\if false
+\include{glossaryentries}
+\fi
+
+\include{zhawSetup}
+
+\begin{document}
+
+\maketitle
+
+\section{Attendees}\label{sec:Attandees}
+\textbf{Present:} Stephan Neuhaus, Raphael Emberger\\
+\textbf{Absent:} Kevin Schwarz\textit{(illness)}
+
+\section{Initiation}\label{sec:Initiation}
+The meeting took place on the \textit{Friday, 5th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+
+\section{Points of discussion}
+\subsection{Process forking unsuccessful}
+Attempts on forking a sub-process were unsuccessful. The reason for this was that the standard
+library of Go doesn’t allow such mechanics, as Go was designed with go-routines in mind instead.
+\paragraph{Solution}
+A quick test with cgo yielded a viable solution to the problem: Using the C-routine \texttt{fork()} a fork was successful.
+
+\subsection{Shell instantiating and forwarding}
+Attempts in forwarding the client connection to a server-side shell's \texttt{stdin} and its \texttt{stdout} and \texttt{stderr} to the connection of the client were unsuccessful.
+\paragraph{Solution}
+One quick tests showed that hooking up the \texttt{std*} pipes to a local shell process with Go worked just fine. Therefore it was deemed feasible to transfer the entire interface to the client.
+
+\subsection{Participation of Mr. Schwarz}
+Up until this date, the participation of Mr Schwarz was remarkable little in terms of writing on the code base of the project. The present parties agreed on this matter.
+\paragraph{Solution}
+It was decided to give Mr Schwarz a choice of action: Either he starts to participate heavily in the project from now on or he opts out of the project entirely.
+
+\section{Old Business}
+\begin{itemize}
+\item \textbf{Login attempts in Linux fail: } This problem was deemed lower priority, as Login works
+on the WSL and can still be dealt with in later stages of the project.
+\end{itemize}
+
+\section*{Next Meeting}
+\textit{Friday, 5th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+
+\end{document}

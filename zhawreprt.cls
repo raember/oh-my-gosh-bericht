@@ -26,6 +26,8 @@
 \ProvidesClass{zhawreprt}[2016/08/23 v1.0 ZHAW style class]
 \newif\iffinal\finalfalse
 \DeclareOption{final}{\finaltrue}
+\newif\ifminutes\minutesfalse
+\DeclareOption{minutes}{\minutestrue}
 \newif\if@german\@germanfalse
 \DeclareOption{german}{\@germantrue\PassOptionsToClass{german}{scrreprt}}
 \DeclareOption{ngerman}{\@germantrue\PassOptionsToClass{ngerman}{scrreprt}}
@@ -157,7 +159,6 @@
 ]{bottom.even}
 \AddLayersToPageStyle{declaration}{top.odd,top.even,bottom.odd,bottom.even}
 
-
 \renewcommand*\maketitle[1][1]{%
   \expandafter\ifnum \csname scr@v@3.12\endcsname>\scr@compatibility\relax
   \else
@@ -168,6 +169,14 @@
     }%
   \fi
   \if@titlepage
+    \ifminutes
+    \renewcommand\thesection{\arabic{section}}
+    \setcounter{page}{#1}
+	{\huge
+	\textbf{\@title}\\\large
+	\textbf{Meeting Minutes}
+	\vskip 0.5cm}
+    \else
     \begin{titlepage}
     \setcounter{page}{#1}
 	\ThisTileWallPaper{\paperwidth}{\paperheight}{images/logos/SoE.pdf}%
@@ -182,7 +191,7 @@
 		\ifx\zhaw@authors\empty\else
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Autoren}
+			\textbf{Authors}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -192,7 +201,7 @@
 		\ifx\zhaw@mainreferee\empty\else
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Hauptbetreuung}
+			\textbf{Supervisor}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -202,7 +211,7 @@
 		\ifx\zhaw@referee\empty\else
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Nebenbetreuung}
+			\textbf{Secondary Supervisor}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -212,7 +221,7 @@
 		\ifx\zhaw@industrypartner\empty\else
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Industriepartner}
+			\textbf{Industry Partner}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -222,7 +231,7 @@
 		\ifx\zhaw@extreferee\empty\else
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Externe Betreuung}
+			\textbf{Extern Supervisor}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -231,7 +240,7 @@
 		\fi
 		\begin{minipage}[b][1.5cm][t]{0.27\textwidth}
 		\hrule\vskip 0.5cm
-			\textbf{Datum}
+			\textbf{Date}
 		\end{minipage}\hfill
 		\begin{minipage}[b][1.5cm][t]{0.7\textwidth}
 		\hrule\vskip 0.5cm
@@ -253,6 +262,7 @@
 	}
 	\fi
     \end{titlepage}
+    \fi
   \else
     \par
     \@tempcnta=%
