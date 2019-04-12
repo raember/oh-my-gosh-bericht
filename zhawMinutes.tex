@@ -27,36 +27,34 @@
 \maketitle
 
 \section{Attendees}\label{sec:Attandees}
-\textbf{Present:} Stephan Neuhaus, Raphael Emberger\\
-\textbf{Absent:} Kevin Schwarz\textit{(illness)}
+\textbf{Present:} Stephan Neuhaus, Raphael Emberger, Kevin Schwarz
 
 \section{Initiation}\label{sec:Initiation}
-The meeting took place on the \textit{Friday, 5th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+The meeting took place on the \textit{Friday, 12th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
 
 \section{Points of discussion}
-\subsection{Process forking unsuccessful}
-Attempts on forking a sub-process were unsuccessful. The reason for this was that the standard
-library of Go doesn’t allow such mechanics, as Go was designed with go-routines in mind instead.
-\paragraph{Solution}
-A quick test with cgo yielded a viable solution to the problem: Using the C-routine \texttt{fork()} a fork was successful.
-
-\subsection{Shell instantiating and forwarding}
-Attempts in forwarding the client connection to a server-side shell's \texttt{stdin} and its \texttt{stdout} and \texttt{stderr} to the connection of the client were unsuccessful.
-\paragraph{Solution}
-One quick tests showed that hooking up the \texttt{std*} pipes to a local shell process with Go worked just fine. Therefore it was deemed feasible to transfer the entire interface to the client.
-
 \subsection{Participation of Mr. Schwarz}
-Up until this date, the participation of Mr Schwarz was remarkable little in terms of writing on the code base of the project. The present parties agreed on this matter.
+Mr Schwarz decided to opt out of the project because of time issues. Mr Neuhaus will therefore adapt the outline of the project.
+
+\subsection{Reading user data works}
+The new module to read user data via the \texttt{getpwnam(3)} API has been implemented using \texttt{cgo}. It can read all the required data(i.e. the user shell which wasn't supported in the go standard library).
+
+\subsection{Forking implemented, but causes problems}
+Forking has been implemented via \texttt{cgo} but after forking, the \texttt{net.Conn} object cannot be used by the child process. There is also the to further investigate, whether after forking a new process actually gets started, as a quick look at the processes didn't reveal that a fork has been processed.
 \paragraph{Solution}
-It was decided to give Mr Schwarz a choice of action: Either he starts to participate heavily in the project from now on or he opts out of the project entirely.
+To counter this problem it is suggested to do the connection build up via \texttt{cgo} using the C-socket API. This returns an integer as a file descriptor, which shouldn't cause problems when forking.
+
+\subsection{Remote start and handling of a shell has issues}
+After successfully hooking up the channels from the client to the shell process, almost all mechanics work as expected with exception of missing characters like the \texttt{PS\{1,2,3,4\}} prompts. 
+\paragraph{Solution}
+It is suggested to compare the environment variables of the child shell process and the usual terminals to see if there are deal breaking differences. Adjusting the child shells environment variables might fix the problem.
 
 \section{Old Business}
 \begin{itemize}
-\item \textbf{Login attempts in Linux fail: } This problem was deemed lower priority, as Login works
-on the WSL and can still be dealt with in later stages of the project.
+\item \textbf{Login attempts in Linux fail: } This problem was deemed lower priority, as Login works on the WSL and can still be dealt with in later stages of the project.
 \end{itemize}
 
 \section*{Next Meeting}
-\textit{Friday, 5th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+\textit{Friday, 26th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
 
 \end{document}
