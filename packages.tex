@@ -1,4 +1,4 @@
-	\setdefaultlanguage{german}
+	\setdefaultlanguage{english}
 \RequirePackage{lscape}
 \usepackage{pgfgantt}
 \usepackage{xcolor}
@@ -179,24 +179,24 @@
 \makeatother
 \usepackage{etoolbox}
 \makeatletter
-	\renewcommand\listoftables{%
-	    \section{Tabellenverzeichnis}%
-	    \@mkboth{\MakeUppercase\listtablename}%
-	        {\MakeUppercase\listtablename}%
-	    \@starttoc{lot}%
-	}
-	\renewcommand\listoffigures{%
-	    \section{Abbildungsverzeichnis}%
-	    \@mkboth{\MakeUppercase\listfigurename}%
-	        {\MakeUppercase\listfigurename}%
-	    \@starttoc{lof}%
-	}
-	\renewcommand\lstlistoflistings{%
-	    \section{Listingverzeichnis}%
-	    \@mkboth{\MakeUppercase\listfigurename}%
-	        {\MakeUppercase\listfigurename}%
-	    \@starttoc{lol}%
-	}
+%	\renewcommand\listoftables{%
+%	    \section{Tabellenverzeichnis}%
+%	    \@mkboth{\MakeUppercase\listtablename}%
+%	        {\MakeUppercase\listtablename}%
+%	    \@starttoc{lot}%
+%	}
+%	\renewcommand\listoffigures{%
+%	    \section{Abbildungsverzeichnis}%
+%	    \@mkboth{\MakeUppercase\listfigurename}%
+%	        {\MakeUppercase\listfigurename}%
+%	    \@starttoc{lof}%
+%	}
+%	\renewcommand\lstlistoflistings{%
+%	    \section{Listingverzeichnis}%
+%	    \@mkboth{\MakeUppercase\listfigurename}%
+%	        {\MakeUppercase\listfigurename}%
+%	    \@starttoc{lol}%
+%	}
 	\renewenvironment{thebibliography}[1]
 	     {\section{\bibname}% <-- this line was changed from \chapter* to \section*
 	      \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}%
@@ -244,7 +244,7 @@
 \usepackage{cleveref}
 \usepackage[automake,acronym,numberedsection]{glossaries-extra}
 	\renewcommand*{\glspostdescription}{}
-	\newglossary[slg]{symbols}{sym}{sbl}{Symbolverzeichnis}
+	\newglossary[slg]{symbols}{sym}{sbl}{List of Symbols}
 	\makeglossaries
 	\loadglsentries{glossaryentries.tex}
 	\pdfstringdefDisableCommands{\let\textenglish\@firstofone\let\textgerman\@firstofone}
