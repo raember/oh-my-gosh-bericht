@@ -84,8 +84,8 @@ type User struct {
 func Authenticate(userName string, in io.Reader, out io.Writer) (*User, error) {
 	log.WithFields(log.Fields{
 		"userName": userName,
-		"in":       in,
-		"out":      out,
+		"in":       &in,
+		"out":      &out,
 	}).Traceln("--> login.Authenticate")
 	if os.Getuid() != 0 {
 		log.WithField("uid", os.Getuid()).Warnln("Process isn't root. Login as different loggedInUser won't work.")
