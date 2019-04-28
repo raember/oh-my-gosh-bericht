@@ -27,34 +27,39 @@
 \maketitle
 
 \section{Attendees}\label{sec:Attandees}
-\textbf{Present:} Stephan Neuhaus, Raphael Emberger, Kevin Schwarz
+\textbf{Present:} Stephan Neuhaus, Raphael Emberger
 
 \section{Initiation}\label{sec:Initiation}
-The meeting took place on the \textit{Friday, 12th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+The meeting took place on the \textit{Friday, 26th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
 
 \section{Points of discussion}
-\subsection{Participation of Mr. Schwarz}
-Mr Schwarz decided to opt out of the project because of time issues. Mr Neuhaus will therefore adapt the outline of the project.
+\subsection{Login and shell usage}
+The remote login, starting and usage of a user shell works now. It still does not behave like intended, as there are warnings printed on the screen and every line written gets echoed back, but overall, it works.
 
-\subsection{Reading user data works}
-The new module to read user data via the \texttt{getpwnam(3)} API has been implemented using \texttt{cgo}. It can read all the required data(i.e. the user shell which wasn't supported in the go standard library).
-
-\subsection{Forking implemented, but causes problems}
-Forking has been implemented via \texttt{cgo} but after forking, the \texttt{net.Conn} object cannot be used by the child process. There is also the to further investigate, whether after forking a new process actually gets started, as a quick look at the processes didn't reveal that a fork has been processed.
+\subsection{Pty echoes \texttt{stdin} back to \texttt{stdout} on client}
+As described in the point above, when entering shell commands on the shell after remote login, the written lines gets echoed back after hitting enter.
 \paragraph{Solution}
-To counter this problem it is suggested to do the connection build up via \texttt{cgo} using the C-socket API. This returns an integer as a file descriptor, which shouldn't cause problems when forking.
+The reason this was so, is because the terminal on the client was still in the \textit{cooked} mode rather than the \textit{raw} mode, which behaves differently from the default \textit{cooked} mode, which read line by line and catches and interprets signals like \texttt{[Ctrl]+[C]} or \texttt{[Ctrl]+[D]}. Setting the terminal into \textit{raw} mode should solve the issue as explained in "The Linux Programming Interface".
 
-\subsection{Remote start and handling of a shell has issues}
-After successfully hooking up the channels from the client to the shell process, almost all mechanics work as expected with exception of missing characters like the \texttt{PS\{1,2,3,4\}} prompts. 
+\subsection{Transfer of \texttt{SIGWINCH}/\texttt{ioctl}}
+As described in the first point of discussion, when dropping into the remote shell, there are warnings displayed about a problem with \texttt{ioctl}.
 \paragraph{Solution}
-It is suggested to compare the environment variables of the child shell process and the usual terminals to see if there are deal breaking differences. Adjusting the child shells environment variables might fix the problem.
+In "The Linux Programming Interface" it is also mentioned that making the child the session leader would solve this issue.
+
+\subsection{Login with test user fails}
+Trying to login with the test user results in an error when starting the shell because of missing files.
+\paragraph{Solution}
+This issue was easily solved as the script for setting up the test user was faulty: It didn't properly create the home directory of the test user and since the process which dropped privilege after login didn't have root rights anymore, it couldn't enter the home directory. Therefore, the directory owner and permissions were amended.
+
+\subsection{Forking abandoned}
+3.4 of the last meeting suggested using the C-style sockets to pass the file descriptors to the child process, which should solve the issue with forking and still using the \texttt{net.Conn} object. This has been implemented and after some adjustment worked out well.
 
 \section{Old Business}
 \begin{itemize}
-\item \textbf{Login attempts in Linux fail: } This problem was deemed lower priority, as Login works on the WSL and can still be dealt with in later stages of the project.
+\item \textbf{Login attempts in Linux fail} This problem was deemed lower priority, as Login works on the WSL and can still be dealt with in later stages of the project.
 \end{itemize}
 
 \section*{Next Meeting}
-\textit{Friday, 26th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+\textit{Friday, 3th of March 2019, 12:30} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
 
 \end{document}
