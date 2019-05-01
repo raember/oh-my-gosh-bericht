@@ -29,9 +29,23 @@
 \chapter*{Abstract}\label{sec:Abstract}
 \notes{\item Zusammenfassung}
 
+
 \chapter*{Preface}\label{sec:Preface}
 \notes{\item Stellt den persönlichen Bezug zur Arbeit dar und spricht Dank aus.}
-This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03}.
+The \gls{SSH} protocol \citep{rfc253,rfc6668,rfc8268,rfc8308,rfc8332} is a system that allows a user to log in on a remote machine and perform tasks on that remote machine via a \gls{CLI}. \gls{SSH} is widely known and used in everyday tasks. However: It is now over twelve years old in its current form. One of the problems with \gls{SSH} is its complexity, both in the initial phase when key material is exchanged, but also later, for example because the server must always decide whether to return a character that has been sent to it or not (echo).
+
+The goal of this work is a radically simplified protocol, which in its functions is similar to \gls{SSH} (N.B. the similarity concerns the functions, not necessarily the protocol details). I develop the protocol, as well as a client and a server - all in \gls{Go}. I demonstrate that the software can replace \gls{SSH} by showing that it can handle several common use cases, among them:
+
+\begin{itemize}
+\item Interactive session
+\item \texttt{Rsync} with my solution as transport protocol
+\end{itemize}
+
+This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03} and aroused my interest as it is a challenge in the domain of information security and will produce a palpable result.
+
+On this note I would like to thank \gls{ZHAW} for granting me the opportunity to do my Bachelors thesis here and Dr. Stephan Neuhaus for helping me along the way of this Bachelors thesis.
+\\\\
+This thesis has been worded with technically literate readers in mind. However: For core concepts and special terms, a glossary can be found at \ref{sec:Glossary}.
 
 \makedeclarationoforiginality
 
@@ -44,6 +58,42 @@ This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03}.
 \item Stand der Technik: Bisherige Lösungen des Problems und deren Grenzen
 \item (Nennt kurz den Industriepartner und/oder weitere Kooperationspartner und dessen/deren Interesse am Thema Fragestellung)
 }
+There was no thesis done on this subject that could have been used as reference. There are however several software projects that deal with a similar problem.
+
+\subsection{OpenSSH}\label{ssec:OpenSSH}
+The most noteworthy work to mention is of course \gls{SSH} itself. \cite{openssh} is the name of the open source project which provides millions of administrators and developers with the ability to securely connect to a remote host. It replaces the up until then widely used protocols like \texttt{telnet}\ref{ssec:Telnet} and \texttt{rlogin}/\texttt{rsh}\ref{ssec:BerkeleyRCommands}.\\
+\gls{SSH} uses \gls{TLS} to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.\\
+\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a terminal on that machine.
+It can also forward traffic on local ports to the remote host through the secure channel. This is also used by third party programs such as \texttt{rsync}.\\
+When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}. Another feature is whitelisting of clients via their public keys, which barres intrusion via hijacked user-password-credentials.\\
+After a secure connection could be established, there are multiple possibilities to use the opened channel. One is to forward the \gls{GUI} of a remote program to the client. Another one is to use this channel to tunnel more connections through it: For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host. This can obscure and secure this traffic between the host and the server.
+
+\subsection{Telnet}\label{ssec:Telnet}
+Telnet\citep{rfc15,rfc854} is an old(1969) and deprecated communication protocol which doesn't feature any security. However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.\\
+Telnet still has 23 as its very own \gls{port} assigned to it.
+\subsubsection{Go-Telnet}
+Go-Telnet\citep{gotelnet} is a \gls{TELNETS} supporting client-server-application which has been implemented in \gls{Go}.
+
+\subsection{Berkeley r-commands}\label{ssec:BerkeleyRCommands}
+The Berkley r-commands are a set of commands to do certain tasks on remote hosts. Those tasks are similar to their counterparts without a leading "\texttt{r}".
+\begin{itemize}
+\item \texttt{rlogin}\\
+This command connects to the host and performs a \texttt{login} command, which includes authentication and if successful, spawning a user \gls{shell}.
+\item \texttt{rsh}\\
+\texttt{rsh} spawns a \gls{shell} without the log in process.
+\item \texttt{rexec}\\
+With this command, the user can log in to a remote machine and execute one command.
+\item \texttt{rcp}\\
+Using this command gives the user the ability to copy from and to a remote host.
+\item \texttt{rwho}\\
+This command tells the user what users are currently logged in on the remote machine.
+\item \texttt{rstat}\\
+\texttt{rstat} displays file system information from remote hosts.
+\item \texttt{ruptime}\\
+With this command, the user can see the uptime, number of logged in users and current work load of the remote machine.
+\end{itemize}
+
+
 \section{Task}\label{sec:Task}
 \notes{
 \item Formuliert das Ziel der Arbeit
@@ -54,44 +104,10 @@ This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03}.
 \item (Angaben zum Zielpublikum: nennt das für die Arbeit vorausgesetzte Wissen)
 \item (Terminologie: Definiert die in der Arbeit verwendeten Begriffe)
 }
+The objective of this thesis is to create a simplified communication protocol between a client and a server to allow the client to log in on the server.
 
 \chapter{Theoretical Principles}\label{chp:TheoreticalPrinciples}
-Test this one here too, please
-\setlistingGo
-\begin{lstlisting}[linebackgroundcolor={\inlist{lstnumber}{3,4}}]
-package login
 
-import (
-	"bufio"
-	"errors"
-	"fmt"
-	"github.com/msteinert/pam"
-	log "github.com/sirupsen/logrus"
-	_ "github.engineering.zhaw.ch/neut/oh-my-gosh/pkg/common"
-	"github.engineering.zhaw.ch/neut/oh-my-gosh/pkg/connection"
-	"github.engineering.zhaw.ch/neut/oh-my-gosh/pkg/pw"
-	"io"
-	"os"
-	"strings"
-)
-
-type User struct {
-	Name        string
-	Transaction *pam.Transaction
-	PassWd      *pw.PassWd
-}
-
-func Authenticate(userName string, in io.Reader, out io.Writer) (*User, error) {
-	log.WithFields(log.Fields{
-		"userName": userName,
-		"in":       &in,
-		"out":      &out,
-	}).Traceln("--> login.Authenticate")
-	if os.Getuid() != 0 {
-		log.WithField("uid", os.Getuid()).Warnln("Process isn't root. Login as different loggedInUser won't work.")
-	}
-}
-\end{lstlisting}
 
 \chapter{Method}\label{chp:Method}
 \notes{
@@ -108,7 +124,6 @@ func Authenticate(userName string, in io.Reader, out io.Writer) (*User, error) {
 \notes{\item (Zusammenfassung der Resultate)}
 
 \chapter{Discussion And Prospects}\label{chp:DiscussionAndProspects}
-Wie in \cite[Kapitel~2, Seite~215]{DahmenReusken2008} nachzulesen, gibt es sogenannte Gleichungen\index{Gleichung}.\gls{hrz}\gls{elitism}\gls{ohm}
 \notes{
 \item Bespricht die erzielten Ergebnisse bezüglich ihrer Erwartbarkeit, Aussagekraft und Relevanz
 \item Interpretation und Validierung der Resultate

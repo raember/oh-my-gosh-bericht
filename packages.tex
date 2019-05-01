@@ -124,7 +124,7 @@
 \usepackage{fontspec}
 	\setmainfont{Arial} % sets the roman font
 	\setsansfont{Arial} % sets the sans-sérif font
-	\setmonofont{Arial} % sets the monospace font
+	\setmonofont{Fira Mono} % sets the monospace font
 \usepackage{microtype}
 \usepackage{colortbl}
 \usepackage{tabularx}
@@ -142,6 +142,15 @@
 \usepackage{array}
 \usepackage{natbib}
 	\bibliographystyle{agsm}
+\DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
+\DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
+\DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
+\DeclareOldFontCommand{\bf}{\normalfont\bfseries}{\mathbf}
+\DeclareOldFontCommand{\it}{\normalfont\itshape}{\mathit}
+\DeclareOldFontCommand{\sl}{\normalfont\slshape}{\@nomath\sl}
+\DeclareOldFontCommand{\sc}{\normalfont\scshape}{\@nomath\sc}
+\DeclareRobustCommand*\cal{\@fontswitch\relax\mathcal}
+\DeclareRobustCommand*\mit{\@fontswitch\relax\mathnormal}
 \usepackage{usecases}
 \usepackage{footnote}
 	\makesavenoteenv{description}
@@ -201,24 +210,24 @@
 \makeatother
 \usepackage{etoolbox}
 \makeatletter
-%	\renewcommand\listoftables{%
-%	    \section{Tabellenverzeichnis}%
-%	    \@mkboth{\MakeUppercase\listtablename}%
-%	        {\MakeUppercase\listtablename}%
-%	    \@starttoc{lot}%
-%	}
-%	\renewcommand\listoffigures{%
-%	    \section{Abbildungsverzeichnis}%
-%	    \@mkboth{\MakeUppercase\listfigurename}%
-%	        {\MakeUppercase\listfigurename}%
-%	    \@starttoc{lof}%
-%	}
-%	\renewcommand\lstlistoflistings{%
-%	    \section{Listingverzeichnis}%
-%	    \@mkboth{\MakeUppercase\listfigurename}%
-%	        {\MakeUppercase\listfigurename}%
-%	    \@starttoc{lol}%
-%	}
+	\renewcommand\listoftables{%
+	    \section{List of Tables}%
+	    \@mkboth{\MakeUppercase\listtablename}%
+	        {\MakeUppercase\listtablename}%
+	    \@starttoc{lot}%
+	}
+	\renewcommand\listoffigures{%
+	    \section{List of Figures}%
+	    \@mkboth{\MakeUppercase\listfigurename}%
+	        {\MakeUppercase\listfigurename}%
+	    \@starttoc{lof}%
+	}
+	\renewcommand\lstlistoflistings{%
+	    \section{List of Listings}%
+	    \@mkboth{\MakeUppercase\listfigurename}%
+	        {\MakeUppercase\listfigurename}%
+	    \@starttoc{lol}%
+	}
 	\renewenvironment{thebibliography}[1]
 	     {\section{\bibname}% <-- this line was changed from \chapter* to \section*
 	      \@mkboth{\MakeUppercase\bibname}{\MakeUppercase\bibname}%
@@ -269,8 +278,8 @@
 	plainpages = false,
 	unicode,
 	citecolor  = green!60!blue,
-	linkcolor  = red!70!yellow,
-	urlcolor   = blue!90!red,
+	linkcolor  = blue!80!red,
+	urlcolor   = blue!60!green,
 }
 \usepackage[automake,acronym,numberedsection]{glossaries-extra}
 	\renewcommand*{\glspostdescription}{}
