@@ -20,8 +20,9 @@
 
 \begin{document}
 \begin{landscape}
-\subsection{Gantt-Diagram}
-\label{sec:GanttDiag}
+%\subsection{Gantt-Diagram}
+%\label{sec:GanttDiag}
+\thispagestyle{empty}
 
 \definecolor{MainBack1}{RGB}{46,46,48}
 \definecolor{MainBack2}{RGB}{86,86,88}
@@ -98,39 +99,65 @@ y unit chart = 0.8cm,
 y unit title = 0.9cm,
 vgrid = {*6{color = SubBack1, dotted, thin},*1{color = MainBack1, dashed, very thin}},
 hgrid style/.style = {color = MainBack1, dotted, thick},
-today = 28.10.2016,
+today = 2.5.2019,
 today offset=0.5,
-today label = Heute,
+today label = Today,
 today label node/.append style = {anchor = north west},
 today label font = \color{MainBack1},
 today rule/.style = {draw = blue!70!red!70!black, thick},
-calendar week text = {KW~\myWeek},
+calendar week text = {W~\myWeek},
 title/.style={fill=MainBack1, draw=MainBack1},
 title label font=\color{MainFront}\bfseries,
 title left shift=.1,
 title right shift=-.1,
 title top shift=.05,
 title height=.75,
-progress label text = {\pgfmathprintnumber[precision=0]{#1}\% abgeschlossen},
+progress label text = {\pgfmathprintnumber[precision=0]{#1}\%},
 link/.style={-stealth, shorten > = 1pt, MainBack1, thick},
 link mid = 0.4,
 link bulge = 1.2,
 }
 \def\pgfcalendarmonthname#1{%
-\ifcase #1 Januar\or Februar\or März\or April\or Mai\or Juni\or Juli\or August\or September\or Oktober\or November\or Dezember\fi%
+\ifcase #1 Nope\or January\or February\or March\or April\or Mai\or June\or July\or August\or September\or October\or November\or December\fi%
 }
 \def\pgfcalendarweekdayletter#1{%
-\ifcase #1 M\or D\or M\or D\or F\or S\or S\fi%  
+\ifcase #1 Mo\or Tu\or We\or Th\or Fr\or Sa\or Su\fi%  
 }
-\setcounter{myWeekNum}{37}
-\begin{ganttchart}{12.9.2016}{18.12.2016}
-	\gantttitle{Gantt-Diagram}{98}\\
+\setcounter{myWeekNum}{8}
+\begin{ganttchart}{18.2.2019}{7.6.2019}
+	\gantttitle{Gantt-Diagram}{110}\\
 	\gantttitlecalendar{month = name, week} \\
-	\ganttgroup[progress=today]{Studium}{12.9.2016}{18.12.2016} \\
-	\ganttbar[progress=none,name=Jap]{Japan}{14.11.2016}{27.11.2016} \\[grid]
-	\ganttlinkedbar[link type=f-f,link label={MUAHAHA}]{Foobar 3}{16.10.2016}{29.11.2016}\\
-	\ganttmilestone[progress=none,name=Foo]{Milestone Test}{28.10.2016}
-	\ganttlink[link mid = 0.2]{Jap}{Foo}
+%	\ganttgroup[progress=today]{Studium}{18.2.2019}{7.6.2019} \\
+	\ganttbar[progress=100,name=TResearch]%
+		{Technical Research}%
+		{4.3.2019}{24.3.2019}\\
+	\ganttbar[progress=100,name=Concept]%
+		{Conceptualizing}%
+		{18.3.2019}{24.3.2019}\\
+	\ganttmilestone[progress=none,name=Prework]{Pre-work}{24.3.2019}\\[grid]
+	
+	\ganttbar[progress=100,name=ProtoNoSec]%
+		{Prototype without Security}%
+		{25.3.2019}{14.4.2019}\\
+	\ganttmilestone[progress=none,name=ProtoDeadline]{Deadline of the Prototype}{14.4.2019}\\[grid]
+	
+	\ganttbar[progress=50,name=TestNAnalysis]%
+		{Testing and Analysis}%
+		{15.4.2019}{5.5.2019}\\
+	\ganttbar[progress=50,name=Rework]%
+		{Rework of Protocol}%
+		{22.4.2019}{12.5.2019}\\
+	\ganttbar[progress=20,name=Manual]%
+		{Manual of Use}%
+		{6.5.2019}{12.5.2019}\\
+	\ganttmilestone[progress=none,name=ProofOfConDeadline]{Deadline of Proof-of-concept}{12.5.2019}\\[grid]
+	
+	\ganttbar[progress=30,name=Writing]%
+		{Writing}%
+		{13.5.2019}{7.6.2019}\\
+	\ganttmilestone[progress=none,name=ProtoDeadline]{Deadline of the Prototype}{7.6.2019}
+%	\ganttlinkedbar[link type=f-f,link label={MUAHAHA}]{Foobar 3}{16.4.2019}{29.5.2019}\\
+%	\ganttmilestone[progress=none,name=Foo]{Milestone Test}{28.5.2019}
 \end{ganttchart}
 
 \end{landscape}

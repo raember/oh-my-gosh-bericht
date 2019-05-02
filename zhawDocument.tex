@@ -44,8 +44,6 @@ The goal of this work is a radically simplified protocol, which in its functions
 This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03} and aroused my interest as it is a challenge in the domain of information security and will produce a palpable result.
 
 On this note I would like to thank \gls{ZHAW} for granting me the opportunity to do my Bachelors thesis here and Dr. Stephan Neuhaus for helping me along the way of this Bachelors thesis.
-\\\\
-This thesis has been worded with technically literate readers in mind. However: For core concepts and special terms, a glossary can be found at \ref{sec:Glossary}.
 
 \makedeclarationoforiginality
 
@@ -104,7 +102,30 @@ With this command, the user can see the uptime, number of logged in users and cu
 \item (Angaben zum Zielpublikum: nennt das für die Arbeit vorausgesetzte Wissen)
 \item (Terminologie: Definiert die in der Arbeit verwendeten Begriffe)
 }
-The objective of this thesis is to create a simplified communication protocol between a client and a server to allow the client to log in on the server.
+The official formulation of the tasks can be found in the appendix \ref{ssec:OfficialStatementOfTasks}.\\
+The objective of this thesis is as follows:
+\begin{itemize}
+\item Design and implement a client-server protocol that can manage interactive sessions.
+\item Design and implement a privilege-separation architecture on the server side that allows safe dropping of privileges once a client establishes a connection.
+\end{itemize}
+For a passing grade (4.0), the work must contain at least the following:
+\begin{itemize}
+\item In the thesis, an introduction to the problem and why the envisaged solution will solve it.
+\item In the thesis, a survey of related work in the area.
+\item In the thesis, a detailed design of the solution.
+\item In the thesis, an evaluation of the performance of the implemented solution.
+\item In the software, a privilege-separation architecture.
+\end{itemize}
+Incorporating the following components will improve the grade:
+\begin{itemize}
+\item In the related work section of the thesis, a comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better.
+\item In the thesis, a detailed analysis of the security of the solution, including possible attacks and defenses.
+\item Use of TLS as the transport layer.
+\item A proof-of-concept client that can handle interactive sessions.
+\item A proof-of-concept client that works as a transport for \texttt{rsync}.
+\end{itemize}
+\vspace{1.5cm}
+This thesis has been worded with technically literate readers in mind. However: For core concepts and special terms, a glossary can be found at \ref{sec:Glossary}. Used acronyms are listed in \ref{sec:AcronymGlossary}.
 
 \chapter{Theoretical Principles}\label{chp:TheoreticalPrinciples}
 
@@ -156,6 +177,21 @@ The objective of this thesis is to create a simplified communication protocol be
 \item (Zeitplan) 
 \item (Besprechungsprotokolle oder Journals)
 }
+\subsection{Official Statement of Tasks}\label{ssec:OfficialStatementOfTasks}
+\includepdf[pages=-]{tasks.pdf}
+\subsection{Project Plan}\label{ssec:ProjectPlan}
+\includepdf[pages=-]{projectplan/Revised_project_plan.pdf}
+\includepdf[pages=-,landscape=true]{zhawGanttDiagram.pdf}
+\subsection{Meeting Minutes}\label{ssec:MeetingMinutes}
+The meeting minutes have a disruption in style and execution beginning from the 6th meeting. Reason for this is because in the beginning of the project, Mr Schwarz was responsible for keeping the minutes, but he opted out of the project.
+\includepdf[pages=-]{minutes/2nd_Meeting.pdf}
+\includepdf[pages=-]{minutes/3rd_Meeting.pdf}
+\includepdf[pages=-]{minutes/4th_Meeting.pdf}
+\includepdf[pages=-]{minutes/5th_Meeting.pdf}
+\includepdf[pages=-]{minutes/6th_Meeting.pdf}
+\includepdf[pages=-]{minutes/7th_Meeting.pdf}
+\includepdf[pages=-]{minutes/8th_Meeting.pdf}
+
 \section{Others}\label{sec:Others}
 \notes{
 \item CD mit dem vollständigen Bericht als pdf-File inklusive Film- und Fotomaterial
