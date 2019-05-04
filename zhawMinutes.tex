@@ -30,36 +30,30 @@
 \textbf{Present:} Stephan Neuhaus, Raphael Emberger
 
 \section{Initiation}\label{sec:Initiation}
-The meeting took place on the \textit{Friday, 26th of April 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+The meeting took place on the \textit{Friday, 3th of May 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
 
 \section{Points of discussion}
-\subsection{Login and shell usage}
-The remote login, starting and usage of a user shell works now. It still does not behave like intended, as there are warnings printed on the screen and every line written gets echoed back, but overall, it works.
+\subsection{Pty echoes stdin back to stdout on client}
+The suggested solution from last meetings 3.2 of setting the client terminal into raw mode worked out well and has since been implemented like this.
 
-\subsection{Pty echoes \texttt{stdin} back to \texttt{stdout} on client}
-As described in the point above, when entering shell commands on the shell after remote login, the written lines gets echoed back after hitting enter.
+\subsection{SockAddr}
+The x-package \texttt{unix} provides wrappers for common Unix API calls. Most of the handling with sockets could be transferred to their methods, except \texttt{getpeername(3)}, which was implemented in the old way using CGo. The reason being that the returned \texttt{SockAddr} interace from \texttt{accept(3)} and \texttt{getpeername(3)} couldn't be casted(or rather: type-asserted) to be used as \texttt{SockAddrInet4} struct.
 \paragraph{Solution}
-The reason this was so, is because the terminal on the client was still in the \textit{cooked} mode rather than the \textit{raw} mode, which behaves differently from the default \textit{cooked} mode, which read line by line and catches and interprets signals like \texttt{[Ctrl]+[C]} or \texttt{[Ctrl]+[D]}. Setting the terminal into \textit{raw} mode should solve the issue as explained in "The Linux Programming Interface".
+After some experiments and searching the internet, it was revealed that the type assertion had to use pointers instead.
 
-\subsection{Transfer of \texttt{SIGWINCH}/\texttt{ioctl}}
-As described in the first point of discussion, when dropping into the remote shell, there are warnings displayed about a problem with \texttt{ioctl}.
-\paragraph{Solution}
-In "The Linux Programming Interface" it is also mentioned that making the child the session leader would solve this issue.
+\subsection{Role of login in the application}
+Just relying on \texttt{login} to perform all the important steps to log a user in is not a viable solution, as this would make log in via keys impossible. Therefore, it was made so the server decides whether to attempt to log in via keys or just to call \texttt{login}. Key authentication has been implemented as well and doesn't rely on \texttt{login}.
 
-\subsection{Login with test user fails}
-Trying to login with the test user results in an error when starting the shell because of missing files.
-\paragraph{Solution}
-This issue was easily solved as the script for setting up the test user was faulty: It didn't properly create the home directory of the test user and since the process which dropped privilege after login didn't have root rights anymore, it couldn't enter the home directory. Therefore, the directory owner and permissions were amended.
+\subsection{Documentation and bug-fixes before new features}
+It was deemed better to stop implementing new features as time is about to run out. Therefore, it is suggested to invest 80\% of the remaining time to write on the documentation and 20\% on bug-fixing. Only after everything has been finished, can new features be implemented - if at all.
 
-\subsection{Forking abandoned}
-3.4 of the last meeting suggested using the C-style sockets to pass the file descriptors to the child process, which should solve the issue with forking and still using the \texttt{net.Conn} object. This has been implemented and after some adjustment worked out well.
+\subsection{Documentation chapter renaming}
+The original template for the BSc thesis has chapters named "Theoretical Principles" and "Method" in them, which will be renamed to the more appropriate "Design" and "Implementation". The latter will not reflect the progress in a chronological order but instead order it point by point.
 
-\section{Old Business}
-\begin{itemize}
-\item \textbf{Login attempts in Linux fail} This problem was deemed lower priority, as Login works on the WSL and can still be dealt with in later stages of the project.
-\end{itemize}
+\subsection{Login attempts in Linux fail}
+Relying on \texttt{login} finally solved the problem of logging in on a specific linux distribution. The log in via keys also works, as the problem was originally PEM dependent, which gets omitted when authenticating via keys.
 
 \section*{Next Meeting}
-\textit{Friday, 3th of March 2019, 12:30} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+\textit{Friday, 10th of March 2019, 12:30} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
 
 \end{document}
