@@ -220,7 +220,7 @@ Forking with the functionality of \gls{CGo} does not solve the problem either. T
 The question then was: How can a process instantiate a child process and hand over all resources to it necessary for handling the new connection?\\
 Since they are 2 separate processes now, they don't share any memory anymore. Hence the parent has to give the child the information about the connection via arguments. The most direct way to deal with this is to use \glspl{fd}, which can be passed as integer arguments to the child.
 
-\subsubsection{Go connection hides important information}
+\subsubsection{Go Connection Cannot Be Transferred}\label{sssec:GoConnectionCannotBeTransferred}
 Getting a \texttt{net.Conn} interface from a \gls{fd} is supported in \gls{Go} via:
 \setlistingGo
 \begin{lstlisting}[caption={Getting a \texttt{net.Conn} interface from a \gls{fd}},label=lst:ConnFromFD]
@@ -231,7 +231,18 @@ if err != nil {
 }
 \end{lstlisting}
 
-However: For unknown reasons, \gls{Go} does not allow for getting the underlying \gls{fd} in any way, as it is treated a private field for connections. This had important implications for the project: The listener on the server could not be created with the high-level \gls{API} of \gls{Go} like:
+Getting the \gls{fd} from a connection is also possible:
+\setlistingGo
+\begin{lstlisting}[caption={Getting the \gls{fd} from a \texttt{net.Conn} object},label=lst:FDFromConn]
+file, err := conn.(*net.TCPConn).File()
+if err != nil {
+	panic(err.String())
+}
+fd := file.Fd()
+\end{lstlisting}
+
+However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from it fails.\\
+This had some implications for the project: The listener on the server could not be created with the high-level like:
 \setlistingGo
 \begin{lstlisting}[caption={\gls{Go}s high level \gls{API} for listener},label=lst:ListenForConn]
 ln, err := net.Listen("tcp", ":8080")
@@ -247,7 +258,8 @@ for {
 }
 \end{lstlisting}
 
-Instead the project had to rely on the low-level \gls{socket}.
+Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{unix} provides the necessary wrapper functions, which can be used instead.\\
+The obvious drawback: Having to rely on a \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
 
 
 
