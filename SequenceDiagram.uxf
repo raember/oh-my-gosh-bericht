@@ -330,7 +330,8 @@ Login(transaction)</panel_attributes>
       <w>1280</w>
       <h>240</h>
     </coordinates>
-    <panel_attributes>session loop</panel_attributes>
+    <panel_attributes>session loop
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -384,12 +385,12 @@ In(data)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1160</x>
+      <x>1130</x>
       <y>100</y>
-      <w>100</w>
+      <w>160</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>goshd:Host</panel_attributes>
+    <panel_attributes>goshd:RequestBroker</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -423,7 +424,7 @@ In(data)</panel_attributes>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
-ConnectRequestBrocker</panel_attributes>
+ConnectRequestBroker</panel_attributes>
     <additional_attributes>10.0;20.0;190.0;20.0</additional_attributes>
   </element>
   <element>
@@ -446,7 +447,7 @@ Request(type, data)</panel_attributes>
       <w>100</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>goshd:Host</panel_attributes>
+    <panel_attributes>System</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -537,7 +538,8 @@ In(data)</panel_attributes>
       <w>1320</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>session breakdown</panel_attributes>
+    <panel_attributes>session breakdown
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

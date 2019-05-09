@@ -130,10 +130,60 @@ Incorporating the following components will improve the grade:
 \vspace{1.5cm}
 This thesis has been worded with technically literate readers in mind. However: For core concepts and special terms, a glossary can be found at \ref{sec:Glossary}. Used acronyms are listed in \ref{sec:AcronymGlossary}.
 
-\chapter{Theoretical Principles}\label{chp:TheoreticalPrinciples}
+\chapter{Design}\label{chp:Design}
+\section{Implementation Language}\label{sec:ImplementationLanguage}
+In the beginning of the project, Dr Neuhaus suggested the use of \gls{Go} as a modern low-level language over interpreted languages for considerations of security. He emphasized that the use of other low-level languages(like \gls{C} or \gls{C++}) was permissible. In the end the project was implemented in \gls{Go} as suggested.\\
+However, this lead to a few problems in the implementation process(See \ref{chp:Implementation}).
+
+\section{Flow of Action}\label{sec:FlowOfAction}
+To create a client-server protocol for remote log in and interactive sessions, a clear cut architecture is mandatory. The flow of a typical use case should look like this:
+
+\begin{enumerate}
+\item Server listens for incoming connection.
+\item Client dials server.
+\item Server spawns the users login shell and forwards all traffic between shell and Client.
+\item Client uses shell on remote machine.
+\item Client terminates session.
+\item Host terminates.
+\end{enumerate}
+
+However, there are multiple security concerns to be satiated:
+
+\begin{enumerate}
+\item The Client must authenticate himself for a user of the remote system with the appropriate credentials.
+\item The Server has to drop privilege after a successful login to prevent privilege escalation.
+\item The Server has to spawn the login shell of the logged in user with the appropriate rights.
+\end{enumerate}
+
+Furthermore, the current design does not allow for multiple sessions to be run parallel. Therefore it was decided to spawn a new process to handle everything beginning after the connection has been established.\\
+This lead to  the following general flow of actions:
+
+\begin{enumerate}
+\item Server listens for incoming connection.
+\item Client dials server.
+\item Server spawns a Host upon established connection.
+\item Host sets up connection.
+\item Host asks Client to authenticate himself.
+\item Client authenticates himself.
+\item Host drops privilege to logged in user.
+\item Host spawns the users login shell with the same credentials and forwards all traffic between shell and Client.
+\item Client uses shell on remote machine.
+\item Client terminates session.
+\item Host terminates.
+\end{enumerate}
+
+An earlier draft of the flow of actions was designed as a sequence diagram and looked like this:
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{SequenceDiagram}
+\caption{Early design of the architecture as sequence diagram.}
+\label{fig:EarlyDesignSeqDes}
+\end{figure}
+
+This design used a \gls{Request Broker}, which would put another master-slave-relationship between a \gls{shell} and the \gls{Request Broker}. This would have been an over-complication of the use of a \gls{shell}, which, if set correctly, already runs only with the rights of the corresponding user and its groups.
 
 
-\chapter{Method}\label{chp:Method}
+
+\chapter{Implementation}\label{chp:Implementation}
 \notes{
 \item (Beschreibt die Grundüberlegungen der realisierten Lösung (Konstruktion/Entwurf) und die Realisierung als Simulation, als Prototyp oder als Software-Komponente)
 \item (Definiert Messgrössen, beschreibt Mess- oder Versuchsaufbau, beschreibt und dokumentiert Durchführung der Messungen/Versuche)

@@ -3,8 +3,10 @@
 name={\textit{#3}},
 plural={\textit{#4}},
 description={\textit{#5}},
-first={\textit{#5}(later referred to as #3)\glsadd{_#1}},
-firstplural={\textit{#6}(later referred to as #4)\glsadd{_#1}},
+%first={\textit{#5}(later referred to as #3)\glsadd{_#1}},
+%firstplural={\textit{#6}(later referred to as #4)\glsadd{_#1}},
+first={\textit{#5}(#3)\glsadd{_#1}},
+firstplural={\textit{#6}(#4)\glsadd{_#1}},
 see=[See]{_#1}
 }
 \longnewglossaryentry{_#1}{type=#2,
@@ -31,12 +33,37 @@ plural={\textit{#6}}
 	description={A \gls{CLI} program, that reads user input line-by-line and executes those commands.},
 	plural=ports
 }
+\newglossaryentry{Request Broker}{
+	name=Request Broker,
+	description={A service that oversees the action requests of a program and decides whether to permit and execute them or not, based on various factors.},
+	plural=ports
+}
 
 % Acronyms with Glossary Entries
 \FullGlossaryEntry{ZHAW}{main}%
 {ZHAW}{}%
 {Zurich University of Applied Sciences}{}%
 {Name of my university of trust.}
+
+\FullGlossaryEntry{Go}{main}%
+{Go}{}%
+{the Go/Golang programming language}{}%
+{Google's programming language.}
+
+\FullGlossaryEntry{C}{main}%
+{C}{}%
+{the C programming language}{}%
+{Low-level programming language originally invented by Dennis Ritchie.}
+
+\FullGlossaryEntry{C++}{main}%
+{C++}{}%
+{the C++ programming language}{}%
+{Descendant of \gls{C} which implemented \gls{OOP}.}
+
+\FullGlossaryEntry{OOP}{main}%
+{OOP}{}%
+{Object Oriented Programming}{}%
+{A programming paradigm which uses objects to model real life entities.}
 
 \FullGlossaryEntry{CLI}{main}%
 {CLI}{}%
@@ -47,11 +74,6 @@ plural={\textit{#6}}
 {SSH}{}%
 {Secure Shell}{}%
 {An client-server-application that allows remote login and interaction with a \gls{shell}. See \ref{ssec:OpenSSH}.}
-
-\FullGlossaryEntry{Go}{main}%
-{Go}{}%
-{Go/Golang}{}%
-{Google's programming language.}
 
 \FullGlossaryEntry{PAM}{main}%
 {PAM}{PAMs}%
