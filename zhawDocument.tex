@@ -175,8 +175,8 @@ This lead to  the following general flow of actions:
 An earlier draft of the flow of actions was designed as a sequence diagram and looked like this:
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{SequenceDiagram}
-\caption{Early design of the architecture as sequence diagram.}
-\label{fig:EarlyDesignSeqDes}
+\caption{Sequence diagram draft.}
+\label{fig:SeqDiaOriginal}
 \end{figure}
 
 This design used a \gls{Request Broker}, which would put another master-slave-relationship between a \gls{shell} and the \gls{Request Broker}. This would have been an over-complication of the use of a \gls{shell}, which, if set correctly, already runs only with the rights of the corresponding user and its groups.
@@ -193,6 +193,63 @@ This design used a \gls{Request Broker}, which would put another master-slave-re
 \item (Tests und Validierung)
 \item (Theoretische Herleitung der Lösung)
 }
+\section{Sequence Diagram}\label{sec:SequenceDiagram}
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{SequenceDiagramNew}
+\caption{Sequence diagram of current implementation.}
+\label{fig:SeqDiaCurrent}
+\end{figure}
+
+\section{Problems}\label{sec:Problems}
+\subsection{Forking}\label{ssec:Forking}
+To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
+In theory, this should have enabled the program to use \gls{Go}s standard library capabilities to handle connections. However, there were several problems with this approach:
+
+\subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
+The \gls{Go} standard library does not support the classical \gls{C}-like forking. It only has a \texttt{syscall.ForkExec} method, which is documented as:
+\begin{quote}
+Combination of fork and exec, careful to be thread safe.
+\end{quote}
+But since it uses \texttt{exec} as well, it is the same as calling arbitrary binaries/scripts with the \texttt{exec.Cmd} function.\\
+However: \gls{Go} has a feature called \gls{CGo}, which allows programs to call and interact with native \gls{C}-routines. This opens up the possibility of using \texttt{fork(2)}.
+
+\subsubsection{Forking breaks Go objects}\label{sssec:ForkingBreaksGoObjects}
+Forking with the functionality of \gls{CGo} does not solve the problem either. The reason is that after forking there are two programs with a \texttt{net.Conn} object. This lead to both connection objects being corrupted and turning unusable. Therefore, it was necessary to abandon the clean solution of forking and instead creating a new executable that can handle new connections by its own.
+
+\subsubsection{Sharing Data with Child}\label{sssec:SharingDataWithChild}
+The question then was: How can a process instantiate a child process and hand over all resources to it necessary for handling the new connection?\\
+Since they are 2 separate processes now, they don't share any memory anymore. Hence the parent has to give the child the information about the connection via arguments. The most direct way to deal with this is to use \glspl{fd}, which can be passed as integer arguments to the child.
+
+\subsubsection{Go connection hides important information}
+Getting a \texttt{net.Conn} interface from a \gls{fd} is supported in \gls{Go} via:
+\setlistingGo
+\begin{lstlisting}[caption={Getting a \texttt{net.Conn} interface from a \gls{fd}},label=lst:ConnFromFD]
+fd := uintptr(0) // Dummy fd
+conn, err := net.FileConn(os.NewFile(fd, "conn"))
+if err != nil {
+	panic(err.String())
+}
+\end{lstlisting}
+
+However: For unknown reasons, \gls{Go} does not allow for getting the underlying \gls{fd} in any way, as it is treated a private field for connections. This had important implications for the project: The listener on the server could not be created with the high-level \gls{API} of \gls{Go} like:
+\setlistingGo
+\begin{lstlisting}[caption={\gls{Go}s high level \gls{API} for listener},label=lst:ListenForConn]
+ln, err := net.Listen("tcp", ":8080")
+if err != nil {
+	// handle error
+}
+for {
+	conn, err := ln.Accept()
+	if err != nil {
+		// handle error
+	}
+	go handleConnection(conn)
+}
+\end{lstlisting}
+
+Instead the project had to rely on the low-level \gls{socket}.
+
+
 
 \chapter{Results}\label{chp:Results}
 \notes{\item (Zusammenfassung der Resultate)}

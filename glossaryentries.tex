@@ -1,17 +1,17 @@
 \newcommand{\FullGlossaryEntry}[7]{%Abkz., Typ, Name, Name(plural), Beschr., Beschr.(plural), Erkl.
 \newglossaryentry{#1}{type=\acronymtype,
-name={\textit{#3}},
-plural={\textit{#4}},
+name={#3},
+plural={#4},
 description={\textit{#5}},
 %first={\textit{#5}(later referred to as #3)\glsadd{_#1}},
 %firstplural={\textit{#6}(later referred to as #4)\glsadd{_#1}},
-first={\textit{#5}(#3)\glsadd{_#1}},
-firstplural={\textit{#6}(#4)\glsadd{_#1}},
+first={#5(#3)\glsadd{_#1}},
+firstplural={#6(#4)\glsadd{_#1}},
 see=[See]{_#1}
 }
 \longnewglossaryentry{_#1}{type=#2,
-name={\textit{#5}},
-plural={\textit{#6}}
+name={#5},
+plural={#6}
 }{\hspace{0pt}\\#7}
 }
 
@@ -33,10 +33,25 @@ plural={\textit{#6}}
 	description={A \gls{CLI} program, that reads user input line-by-line and executes those commands.},
 	plural=ports
 }
+\newglossaryentry{pipe}{
+	name=pipe,
+	description={A pipe is a UNIX feature for \gls{IPC}.},
+	plural=pipes
+}
+\newglossaryentry{socket}{
+	name=socket,
+	description={A network socket is an endpoint for communication over \glspl{port}.},
+	plural=sockets
+}
 \newglossaryentry{Request Broker}{
 	name=Request Broker,
 	description={A service that oversees the action requests of a program and decides whether to permit and execute them or not, based on various factors.},
 	plural=ports
+}
+
+\newglossaryentry{CGo}{
+	name=CGo,
+	description={\gls{C} support for \gls{Go}.}
 }
 
 % Acronyms with Glossary Entries
@@ -65,6 +80,11 @@ plural={\textit{#6}}
 {Object Oriented Programming}{}%
 {A programming paradigm which uses objects to model real life entities.}
 
+\FullGlossaryEntry{fd}{main}%
+{fd}{fds}%
+{file descriptor}{file descriptors}%
+{A file descriptor is an integer that represents the handle to a file.}
+
 \FullGlossaryEntry{CLI}{main}%
 {CLI}{}%
 {Command Line Interface}{}%
@@ -84,6 +104,16 @@ plural={\textit{#6}}
 {API}{APIs}%
 {Application Programming Interface}{Application Programming Interfaces}%
 {Accessible interface for developers to use external code.}
+
+\FullGlossaryEntry{PID}{main}%
+{PID}{PIDs}%
+{Process ID}{Process IDs}%
+{The unique identifier of a process represented as an integer.}
+
+\FullGlossaryEntry{IPC}{main}%
+{IPC}{}%
+{Inter-Process-Communication}{}%
+{Communication between processes.}
 
 \FullGlossaryEntry{GUI}{main}%
 {GUI}{GUIs}%
