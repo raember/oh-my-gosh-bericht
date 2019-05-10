@@ -30,30 +30,19 @@
 \textbf{Present:} Stephan Neuhaus, Raphael Emberger
 
 \section{Initiation}\label{sec:Initiation}
-The meeting took place on the \textit{Friday, 3th of May 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+The meeting took place on the \textit{Friday, 10th of May 2019, 12:20} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
 
 \section{Points of discussion}
-\subsection{Pty echoes stdin back to stdout on client}
-The suggested solution from last meetings 3.2 of setting the client terminal into raw mode worked out well and has since been implemented like this.
+\subsection{File descriptors and Go}
+After resolving last weeks issue with \texttt{SockAddr}(3.2), the same approach enabled us to get the fd of a connection: By type-asserting it as \texttt{*net.TCPConn}, which had a function that returns the underlying file, which in turn had a function for returning the underlying fd.
 
-\subsection{SockAddr}
-The x-package \texttt{unix} provides wrappers for common Unix API calls. Most of the handling with sockets could be transferred to their methods, except \texttt{getpeername(3)}, which was implemented in the old way using CGo. The reason being that the returned \texttt{SockAddr} interace from \texttt{accept(3)} and \texttt{getpeername(3)} couldn't be casted(or rather: type-asserted) to be used as \texttt{SockAddrInet4} struct.
-\paragraph{Solution}
-After some experiments and searching the internet, it was revealed that the type assertion had to use pointers instead.
+\subsection{Privilege dropping}
+After authenticating the user via keys, the host process spawns a shell with the appropriate privileges. For more secure handling, it was deemed best to drop privilege for the entire host process after authenticating via keys. Despite running with root rights(to enable a user to login as any user), the process receives an exception when calling \texttt{unix.Setuid} or \texttt{unix.Setgid}. The reason was assumed to be related to Go's infamous Go-routines.
 
-\subsection{Role of login in the application}
-Just relying on \texttt{login} to perform all the important steps to log a user in is not a viable solution, as this would make log in via keys impossible. Therefore, it was made so the server decides whether to attempt to log in via keys or just to call \texttt{login}. Key authentication has been implemented as well and doesn't rely on \texttt{login}.
-
-\subsection{Documentation and bug-fixes before new features}
-It was deemed better to stop implementing new features as time is about to run out. Therefore, it is suggested to invest 80\% of the remaining time to write on the documentation and 20\% on bug-fixing. Only after everything has been finished, can new features be implemented - if at all.
-
-\subsection{Documentation chapter renaming}
-The original template for the BSc thesis has chapters named "Theoretical Principles" and "Method" in them, which will be renamed to the more appropriate "Design" and "Implementation". The latter will not reflect the progress in a chronological order but instead order it point by point.
-
-\subsection{Login attempts in Linux fail}
-Relying on \texttt{login} finally solved the problem of logging in on a specific linux distribution. The log in via keys also works, as the problem was originally PEM dependent, which gets omitted when authenticating via keys.
+\subsection{Current State of Documentation}
+The current state of the documentation is still insufficient. There are 4 weeks until the deadline. It is suggested to write more on the documentation.
 
 \section*{Next Meeting}
-\textit{Friday, 10th of March 2019, 12:30} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+\textit{Friday, 17th of March 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
 
 \end{document}
