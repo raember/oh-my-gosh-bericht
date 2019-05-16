@@ -22,7 +22,8 @@
       <h>30</h>
     </coordinates>
     <panel_attributes>gosh:Client
-bg=blue</panel_attributes>
+bg=blue
+fg=white</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -34,7 +35,8 @@ bg=blue</panel_attributes>
       <h>1340</h>
     </coordinates>
     <panel_attributes>
-bg=blue</panel_attributes>
+bg=blue
+layer=-2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -186,7 +188,8 @@ host := exec.Command(goshh, fd, remoteAddr)</panel_attributes>
       <h>160</h>
     </coordinates>
     <panel_attributes>for remoteHandle := range remoteChan
-bg=light_gray</panel_attributes>
+bg=light_gray
+layer=-10</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -244,7 +247,8 @@ bg=green</panel_attributes>
       <w>20</w>
       <h>970</h>
     </coordinates>
-    <panel_attributes>bg=green</panel_attributes>
+    <panel_attributes>bg=green
+layer=-3</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -327,7 +331,8 @@ Setup()</panel_attributes>
       <w>20</w>
       <h>180</h>
     </coordinates>
-    <panel_attributes>bg=green</panel_attributes>
+    <panel_attributes>bg=green
+layer=-2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -350,7 +355,8 @@ requestClientEnv(env)</panel_attributes>
       <w>20</w>
       <h>60</h>
     </coordinates>
-    <panel_attributes>bg=green</panel_attributes>
+    <panel_attributes>bg=green
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -363,7 +369,7 @@ requestClientEnv(env)</panel_attributes>
     </coordinates>
     <panel_attributes>Env Transfer
 bg=light_gray
-layer=-1</panel_attributes>
+layer=-10</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -411,7 +417,8 @@ PerformTransfer(conn, conn)</panel_attributes>
       <h>450</h>
     </coordinates>
     <panel_attributes>
-bg=blue</panel_attributes>
+bg=blue
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -446,7 +453,8 @@ Serve()</panel_attributes>
       <w>20</w>
       <h>550</h>
     </coordinates>
-    <panel_attributes>bg=green</panel_attributes>
+    <panel_attributes>bg=green
+layer=-2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -457,7 +465,8 @@ Serve()</panel_attributes>
       <w>20</w>
       <h>240</h>
     </coordinates>
-    <panel_attributes>bg=green</panel_attributes>
+    <panel_attributes>bg=green
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -499,7 +508,7 @@ username != ""
 
 -.
 username == "" || authenticateWithKeys(username) != nil
-layer=-1
+layer=-10
 bg=yellow</panel_attributes>
     <additional_attributes/>
   </element>
@@ -619,7 +628,8 @@ stopTransfer()</panel_attributes>
       <h>40</h>
     </coordinates>
     <panel_attributes>
-bg=blue</panel_attributes>
+bg=blue
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>

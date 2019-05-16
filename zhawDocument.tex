@@ -185,7 +185,15 @@ Now that the transaction has been appropriately prepared, the application can re
 int pam_authenticate(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that points to a function to interactively ask the application to authenticate the user. The application can then ask the user for the user name if not provided already and the password. After successful authentication, the function returns \texttt{PAM\_SUCCESS} and the application can now do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.
+Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that points to a function to interactively ask the application to authenticate the user. The application can then ask the user for the user name if not provided already and the password. After successful authentication, the function returns \texttt{PAM\_SUCCESS} and the application should call \cite{pam_setcred} to establish and maintain the credentials of the logged in user.
+\setlistingC
+\begin{lstlisting}[caption={\gls{PAM} credential setting},label=lst:PAMCredSet]
+#include <security/pam_appl.h>
+
+int pam_setcred(pam_handle_t *pamh, int flags);
+\end{lstlisting}
+
+Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.
 
 \section{Authentication via Keys}\label{sec:AuthViaKeys}
 A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.\\
@@ -245,14 +253,32 @@ int pam_open_session(pam_handle_t *pamh, int flags);
 int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
+\section{Terminal Mode}\label{sec:TerminalMode}
+The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side terminal has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side shell as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
+
+\section{Pseudoterminal}\label{sec:Pseudoterminal}
+Pseudoterminals help to solve the problem of how two remote programs can communicate as if they were directly connected via a terminal.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{PseudoterminalProblem}
+\caption{Diagram of two programs communicating via a pseudoterminal\citep[p.1376]{KerriskTLPI}}
+\label{fig:SeqDiaOriginal}
+\end{figure}
+A shell expects to be connected to a full fledged terminal(or a terminal emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{Pseudoterminal}
+\caption{How pseudoterminals work\citep[p.1377]{KerriskTLPI}}
+\label{fig:SeqDiaOriginal}
+\end{figure}
+
+\newpage
 \section{Flow of Action}\label{sec:FlowOfAction}
 To create a client-server protocol for remote log in and interactive sessions, a clear cut architecture is mandatory. The flow of a typical use case should look like this:
 
 \begin{enumerate}
 \item Server listens for incoming connection.
 \item Client dials server.
-\item Server spawns the users login shell and forwards all traffic between shell and Client.
-\item Client uses shell on remote machine.
+\item Server spawns the users login \gls{shell} and forwards all traffic between \gls{shell} and Client.
+\item Client uses \gls{shell} on remote machine.
 \item Client terminates session.
 \item Host terminates.
 \end{enumerate}
@@ -260,9 +286,9 @@ To create a client-server protocol for remote log in and interactive sessions, a
 However, there are multiple security concerns to be satiated:
 
 \begin{enumerate}
-\item The Client must authenticate himself for a user of the remote system with the appropriate credentials.
+\item The Client must authenticate itself for a user of the remote system with the appropriate credentials.
 \item The Server has to drop privilege after a successful login to prevent privilege escalation.
-\item The Server has to spawn the login shell of the logged in user with the appropriate rights.
+\item The Server has to spawn the login \gls{shell} of the logged in user with the appropriate rights.
 \end{enumerate}
 
 Furthermore, the current design does not allow for multiple sessions to be run parallel. Therefore it was decided to spawn a new process to handle everything beginning after the connection has been established.\\
@@ -276,13 +302,15 @@ This lead to  the following general flow of actions:
 \item Host asks Client to authenticate himself.
 \item Client authenticates himself.
 \item Host drops privilege to logged in user.
-\item Host spawns the users login shell with the same credentials and forwards all traffic between shell and Client.
-\item Client uses shell on remote machine.
+\item Host spawns the users login \gls{shell} with the same credentials and forwards all traffic between \gls{shell} and Client.
+\item Client uses \gls{shell} on remote machine.
 \item Client terminates session.
 \item Host terminates.
 \end{enumerate}
 
-An earlier draft of the flow of actions was designed as a sequence diagram and looked like this:
+\newpage
+\subsection{Old Design}\label{ssec:OldDesign}
+An earlier draft of the flow of actions was designed as a sequence diagram and can be seen in figure \ref{fig:SeqDiaOriginal}.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{SequenceDiagram}
 \caption{Sequence diagram draft.}
@@ -291,6 +319,18 @@ An earlier draft of the flow of actions was designed as a sequence diagram and l
 
 This design used a \gls{Request Broker}, which would put another master-slave-relationship between a \gls{shell} and the \gls{Request Broker}. This would have been an over-complication of the use of a \gls{shell}, which, if set correctly, already runs only with the rights of the corresponding user and its groups.
 
+\subsection{New Design}\label{ssec:NewDesign}
+The new and current design of the architecture can be seen in figure \ref{fig:SeqDiaCurrent}.
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{SequenceDiagramNew}
+\caption{Sequence diagram of current implementation.}
+\label{fig:SeqDiaCurrent}
+\end{figure}
+
+This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:AuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
+If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.\\
+If the \gls{shell} exits or the host process receives a \texttt{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
+The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the terminal in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the terminal to the default cooked state.
 
 
 \chapter{Implementation}\label{chp:Implementation}
@@ -303,13 +343,6 @@ This design used a \gls{Request Broker}, which would put another master-slave-re
 \item (Tests und Validierung)
 \item (Theoretische Herleitung der Lösung)
 }
-\section{Sequence Diagram}\label{sec:SequenceDiagram}
-\begin{figure}[ht]
-\includegraphics[width=\textwidth]{SequenceDiagramNew}
-\caption{Sequence diagram of current implementation.}
-\label{fig:SeqDiaCurrent}
-\end{figure}
-
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
 To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
@@ -423,6 +456,8 @@ The meeting minutes have a disruption in style and execution beginning from the 
 \includepdf[pages=-]{minutes/6th_Meeting.pdf}
 \includepdf[pages=-]{minutes/7th_Meeting.pdf}
 \includepdf[pages=-]{minutes/8th_Meeting.pdf}
+\includepdf[pages=-]{minutes/9th_Meeting.pdf}
+\includepdf[pages=-]{minutes/10th_Meeting.pdf}
 
 \section{Others}\label{sec:Others}
 \notes{
