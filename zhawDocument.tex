@@ -61,7 +61,7 @@ There was no thesis done on this subject that could have been used as reference.
 \subsection{OpenSSH}\label{ssec:OpenSSH}
 The most noteworthy work to mention is of course \gls{SSH} itself. \cite{openssh} is the name of the open source project which provides millions of administrators and developers with the ability to securely connect to a remote host. It replaces the up until then widely used protocols like \cite{telnet}(see \ref{ssec:Telnet}) and \cite{rlogin}/\cite{rsh}(see \ref{ssec:BerkeleyRCommands}).\\
 \gls{SSH} uses \gls{TLS} to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.\\
-\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a terminal on that machine.
+\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{tty} on that machine.
 It can also forward traffic on local ports to the remote host through the secure channel. This is also used by third party programs such as \cite{rsync}.\\
 When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}. Another feature is whitelisting of clients via their public keys, which barres intrusion via hijacked user-password-credentials.\\
 After a secure connection could be established, there are multiple possibilities to use the opened channel. One is to forward the \gls{GUI} of a remote program to the client. Another one is to use this channel to tunnel more connections through it: For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host. This can obscure and secure this traffic between the host and the server.
@@ -122,7 +122,7 @@ Incorporating the following components will improve the grade:
 \begin{itemize}
 \item In the related work section of the thesis, a comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better.
 \item In the thesis, a detailed analysis of the security of the solution, including possible attacks and defenses.
-\item Use of TLS as the transport layer.
+\item Use of \gls{TLS} as the transport layer.
 \item A proof-of-concept client that can handle interactive sessions.
 \item A proof-of-concept client that works as a transport for \texttt{rsync}.
 \end{itemize}
@@ -198,7 +198,7 @@ Now the application can do other \gls{PAM} related actions like session manageme
 \section{Authentication via Keys}\label{sec:AuthViaKeys}
 A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.\\
 When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication. If it matches, the server encrypts a random secret(with high entropy) with the public key to the user. The user decrypts the message with his private key and sends it back to the server. If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.\\
-This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the integrity of a user.
+This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
 
 \section{Post-Login Actions}\label{sec:PostLoginActions}
 When a user logs into a \gls{UNIX} machine, a session and a timestamp gets created.\\
@@ -229,7 +229,7 @@ struct utmpx {
 };
 \end{lstlisting}
 
-On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active terminal, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{ùtmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
+On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{tty}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{ùtmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
 Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended. This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.\\
 A program can also query the \texttt{utmp} file with the according getters.
 \setlistingC
@@ -254,20 +254,26 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
 \section{Terminal Mode}\label{sec:TerminalMode}
-The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side terminal has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side shell as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
+The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{tty} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
 \section{Pseudoterminal}\label{sec:Pseudoterminal}
-Pseudoterminals help to solve the problem of how two remote programs can communicate as if they were directly connected via a terminal.
+\glspl{pty} help to solve the problem of how two remote programs can communicate as if they were directly connected via a \gls{tty}.\\
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalProblem}
-\caption{Diagram of two programs communicating via a pseudoterminal\citep[p.1376]{KerriskTLPI}}
-\label{fig:SeqDiaOriginal}
+\caption{How to operate a \gls{tty}-oriented program over a network?\citep[p.1376]{KerriskTLPI}}
+\label{fig:HowToOperateTtyOrientedProgramOverNetwork}
 \end{figure}
-A shell expects to be connected to a full fledged terminal(or a terminal emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to.
+A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{Pseudoterminal}
-\caption{How pseudoterminals work\citep[p.1377]{KerriskTLPI}}
-\label{fig:SeqDiaOriginal}
+\caption{Two programs communicating via a \gls{pty}\citep[p.1377]{KerriskTLPI}}
+\label{fig:TwoProgramsCommunicatingViaAPty}
+\end{figure}
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{PseudoterminalSSH}
+\caption{How \texttt{ssh} uses a \gls{pty}\citep[p.1378]{KerriskTLPI}}
+\label{fig:HowSSHUsesPty}
 \end{figure}
 
 \newpage
@@ -330,7 +336,7 @@ The new and current design of the architecture can be seen in figure \ref{fig:Se
 This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:AuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
 If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.\\
 If the \gls{shell} exits or the host process receives a \texttt{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
-The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the terminal in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the terminal to the default cooked state.
+The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{tty} in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the \gls{tty} to the default cooked state.
 
 
 \chapter{Implementation}\label{chp:Implementation}
@@ -458,6 +464,7 @@ The meeting minutes have a disruption in style and execution beginning from the 
 \includepdf[pages=-]{minutes/8th_Meeting.pdf}
 \includepdf[pages=-]{minutes/9th_Meeting.pdf}
 \includepdf[pages=-]{minutes/10th_Meeting.pdf}
+\includepdf[pages=-]{minutes/11th_Meeting.pdf}
 
 \section{Others}\label{sec:Others}
 \notes{

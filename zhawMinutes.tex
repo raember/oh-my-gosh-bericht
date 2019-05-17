@@ -30,19 +30,36 @@
 \textbf{Present:} Stephan Neuhaus, Raphael Emberger
 
 \section{Initiation}\label{sec:Initiation}
-The meeting took place on the \textit{Friday, 10th of May 2019, 12:20} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
+The meeting took place on the \textit{Friday, 17th of May 2019, 12:30} in \textit{ZL0.13, Lagerstrasse 45, Zürich}. Raphael Emberger was resonsible for the minutes.
 
 \section{Points of discussion}
-\subsection{File descriptors and Go}
-After resolving last weeks issue with \texttt{SockAddr}(3.2), the same approach enabled us to get the fd of a connection: By type-asserting it as \texttt{*net.TCPConn}, which had a function that returns the underlying file, which in turn had a function for returning the underlying fd.
+\subsection{Referencing Linux Man Pages}
+As the code base heavily relies on the Linux API, it was decided to include bibtex references to the manual pages to improve readability.
 
-\subsection{Privilege dropping}
-After authenticating the user via keys, the host process spawns a shell with the appropriate privileges. For more secure handling, it was deemed best to drop privilege for the entire host process after authenticating via keys. Despite running with root rights(to enable a user to login as any user), the process receives an exception when calling \texttt{unix.Setuid} or \texttt{unix.Setgid}. The reason was assumed to be related to Go's infamous Go-routines.
+\subsection{Clarification of Design of Public Key Cryptography}
+When describing public key cryptography, the current state of the documentation doesn't go into further detail other than describing the flow of actions when authenticating via public key cryptography. This part has to be improved.
 
-\subsection{Current State of Documentation}
-The current state of the documentation is still insufficient. There are 4 weeks until the deadline. It is suggested to write more on the documentation.
+\subsection{Login as Root possible}
+The current state of the implementation allows a client to authenticate itself and log in as root on the server. This is a point that should be improved, but can be postponed for now.
+\paragraph{Solution}
+When using \texttt{login(1)} to authenticate and log in a user, the \texttt{-f} flag can be used to specify a specific user. The client could already ask the user before communication with the server, which user should be used when logging in. This is partially already implemented.
+
+\subsection{Keys remain in memory}
+The current state of the implementation of the client still retains the private key in memory when performing key authentication. This could be a possible vulnerability which could be used by a third party as an attack vector to obtain said key.
+
+\subsection{Keys not stored optimally}
+The public key up to today stored the full public key inside a directory structure in the root user's home directory. This could cause problems when storing keys and should be changed to the way \texttt{ssh} stores authorized public keys: By storing the authorized keys for a server-side user in hashed format in its home directory.
+
+\subsection{RSync not implemented yet}
+The layout of the tasks mentions \texttt{rsync} compatibility as both a required use-case for a passing grade and an optional extra feature. This has been amended by Mr Neuhaus by stating explicitly, that \texttt{rsync} compatibility is optional.
+
+\subsection{Separate bibliography for man page references}
+As references to the Linux manual pages take up a considerable part of the overall references, it was considered to split it up into a manual-only bibliography and a normal bibliography. This suggestion was rejected as it was deemed tolerable to have one single bibliography.
+
+\subsection{Picture for the Publication Tool}
+The official Publication Tool requires a picture to be attached to the abstract when handing it in to the online tool. As this thesis is centered around a CLI application, no picture has been made so far. It was suggested to simply take a screenshot of the application in operation.
 
 \section*{Next Meeting}
-\textit{Friday, 17th of March 2019, 13:00} in \textit{ZL0.13, Lagerstrasse 45, Zürich}
+The next meeting doesn't have a set date, time or place, as it was deemed a better option to organize a new meeting whenever the need for one arises.
 
 \end{document}

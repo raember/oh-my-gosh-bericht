@@ -31,7 +31,7 @@ plural={#6}
 \newglossaryentry{shell}{
 	name=shell,
 	description={A \gls{CLI} program, that reads user input line-by-line and executes those commands.},
-	plural=ports
+	plural=shells
 }
 \newglossaryentry{pipe}{
 	name=pipe,
@@ -50,7 +50,7 @@ plural={#6}
 \newglossaryentry{Request Broker}{
 	name=Request Broker,
 	description={A service that oversees the action requests of a program and decides whether to permit and execute them or not, based on various factors.},
-	plural=ports
+	plural=Request Brockers
 }
 
 \newglossaryentry{CGo}{
@@ -107,6 +107,16 @@ firstplural={Operating Systems(OSes)}
 {CLI}{}%
 {Command Line Interface}{}%
 {A text based interface centered around commands to perform specific tasks.}
+
+\FullGlossaryEntry{tty}{main}%
+{tty}{ttys}%
+{terminal}{terminals}%
+{An user interface to interact with \gls{CLI} programs like \glspl{shell}.}
+
+\FullGlossaryEntry{pty}{main}%
+{pty}{ptys}%
+{pseudoterminal}{pseudoterminals}%
+{A mechanism of \gls{UNIX} to allow programs to communicate as if the other was inside a \gls{tty}.}
 
 \FullGlossaryEntry{SSH}{main}%
 {SSH}{}%
