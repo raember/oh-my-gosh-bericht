@@ -35,7 +35,7 @@ plural={#6}
 }
 \newglossaryentry{pipe}{
 	name=pipe,
-	description={A pipe is a UNIX feature for \gls{IPC}.},
+	description={A pipe is a \gls{Unix} feature for \gls{IPC}.},
 	plural=pipes
 }
 \newglossaryentry{socket}{
@@ -43,9 +43,18 @@ plural={#6}
 	description={A network socket is an endpoint for communication over \glspl{port}.},
 	plural=sockets
 }
-\newglossaryentry{UNIX}{
-	name=UNIX,
+\newglossaryentry{terminal}{
+	name=terminal,
+	description={An user interface to interact with \gls{CLI} programs like \glspl{shell}.},
+	plural=terminals
+}
+\newglossaryentry{Unix}{
+	name=Unix,
 	description={An originally free \gls{OS} family called Unics from AT\&T that re-imagined an older \gls{OS} by the name of Multics.}
+}
+\newglossaryentry{Linux}{
+	name=Linux,
+	description={A \gls{Unix} based \gls{OS} which uses Linus Torvalds kernel and was inspired by Minix.}
 }
 \newglossaryentry{Request Broker}{
 	name=Request Broker,
@@ -110,13 +119,28 @@ firstplural={Operating Systems(OSes)}
 
 \FullGlossaryEntry{tty}{main}%
 {tty}{ttys}%
-{terminal}{terminals}%
-{An user interface to interact with \gls{CLI} programs like \glspl{shell}.}
+{teletype}{teletypes}%
+{Originally a device that could send and receive text messages. Nowadays \gls{tty} refers to \glspl{terminal}, which emulate that behaviour.}
 
 \FullGlossaryEntry{pty}{main}%
 {pty}{ptys}%
 {pseudoterminal}{pseudoterminals}%
-{A mechanism of \gls{UNIX} to allow programs to communicate as if the other was inside a \gls{tty}.}
+{A mechanism of \gls{Unix} to allow programs to communicate as if the other was inside a \gls{tty}.}
+
+\FullGlossaryEntry{ptm}{main}%
+{ptm}{ptms}%
+{pseudoterminal master}{pseudoterminal masters}%
+{The master of a \gls{pty}.}
+
+\FullGlossaryEntry{pts}{main}%
+{pts}{pts's}%
+{pseudoterminal slave}{pseudoterminal slaves}%
+{The slave of a \gls{pty}.}
+
+\FullGlossaryEntry{SIGINT}{main}%
+{SIGINT}{SIGINTs}%
+{interrupt signal}{interrupt signals}%
+{A signal supported by \gls{Unix} based \glspl{OS} which signals to a process to interrupt it's work.}
 
 \FullGlossaryEntry{SSH}{main}%
 {SSH}{}%

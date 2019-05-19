@@ -61,7 +61,7 @@ There was no thesis done on this subject that could have been used as reference.
 \subsection{OpenSSH}\label{ssec:OpenSSH}
 The most noteworthy work to mention is of course \gls{SSH} itself. \cite{openssh} is the name of the open source project which provides millions of administrators and developers with the ability to securely connect to a remote host. It replaces the up until then widely used protocols like \cite{telnet}(see \ref{ssec:Telnet}) and \cite{rlogin}/\cite{rsh}(see \ref{ssec:BerkeleyRCommands}).\\
 \gls{SSH} uses \gls{TLS} to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.\\
-\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{tty} on that machine.
+\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{terminal} on that machine.
 It can also forward traffic on local ports to the remote host through the secure channel. This is also used by third party programs such as \cite{rsync}.\\
 When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}. Another feature is whitelisting of clients via their public keys, which barres intrusion via hijacked user-password-credentials.\\
 After a secure connection could be established, there are multiple possibilities to use the opened channel. One is to forward the \gls{GUI} of a remote program to the client. Another one is to use this channel to tunnel more connections through it: For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host. This can obscure and secure this traffic between the host and the server.
@@ -201,7 +201,7 @@ When starting an authentication, the user sends his public key to the server, wh
 This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
 
 \section{Post-Login Actions}\label{sec:PostLoginActions}
-When a user logs into a \gls{UNIX} machine, a session and a timestamp gets created.\\
+When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.\\
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage. The \texttt{utmpx} \gls{API} offers appropriate functions. The \texttt{utmpx} struct represents a single entry in those files:
 \setlistingC
 \begin{lstlisting}[caption={Definition of the utmpx structure {\citep[p.819]{KerriskTLPI}}},label=lst:UtmpxDefinition]
@@ -229,7 +229,7 @@ struct utmpx {
 };
 \end{lstlisting}
 
-On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{tty}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{ùtmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
+On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{ùtmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
 Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended. This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.\\
 A program can also query the \texttt{utmp} file with the according getters.
 \setlistingC
@@ -254,22 +254,34 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
 \section{Terminal Mode}\label{sec:TerminalMode}
-The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{tty} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
+The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
 \section{Pseudoterminal}\label{sec:Pseudoterminal}
-\glspl{pty} help to solve the problem of how two remote programs can communicate as if they were directly connected via a \gls{tty}.\\
+\glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal}(see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalProblem}
 \caption{How to operate a \gls{tty}-oriented program over a network?\citep[p.1376]{KerriskTLPI}}
 \label{fig:HowToOperateTtyOrientedProgramOverNetwork}
 \end{figure}
-A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to.
+A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to. Therefore the \gls{fd} it is connected to should behave like a real \gls{terminal}. This is where \glspl{pty} come into play.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{Pseudoterminal}
 \caption{Two programs communicating via a \gls{pty}\citep[p.1377]{KerriskTLPI}}
 \label{fig:TwoProgramsCommunicatingViaAPty}
 \end{figure}
+To do this, two files are created: The \gls{ptm} and the corresponding \gls{pts}(see figure \ref{fig:TwoProgramsCommunicatingViaAPty}). \gls{Linux} provides a \gls{pty} generator at \texttt{/dev/ptmx}, which creates a \gls{ptm} and a \gls{pts}. This works by simply opening the \texttt{/dev/ptmx} file using \cite{posix_openpt}. After this, a program has to grant the \gls{pts} file ownership and permissions with \cite{grantpt}, unlock it with \cite{unlockpt} and retrieve its file name with \cite{ptsname}:
+\setlistingC
+\begin{lstlisting}[caption={\gls{pty} related \gls{Linux} \gls{API} functions},label=lst:PtyFunctions]
+#define _XOPEN_SOURCE 500
+#include <stdlib.h>
 
+int posix_openpt(int flags);
+int grantpt(int fd);
+int unlockpt(int fd);
+char *ptsname(int fd);
+\end{lstlisting}
+
+With the \gls{pty} properly set up, a child bound to the \gls{pts} side will assume it is connected to a \gls{terminal} and also behave as such. This mechanism is key to running a \gls{shell} and forwarding all traffic between a remote client and the \gls{shell}. In case of \gls{SSH} and the objective of this thesis, the layout looks like in figure \ref{fig:HowSSHUsesPty}.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalSSH}
 \caption{How \texttt{ssh} uses a \gls{pty}\citep[p.1378]{KerriskTLPI}}
@@ -335,8 +347,8 @@ The new and current design of the architecture can be seen in figure \ref{fig:Se
 
 This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:AuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
 If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.\\
-If the \gls{shell} exits or the host process receives a \texttt{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
-The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{tty} in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the \gls{tty} to the default cooked state.
+If the \gls{shell} exits or the host process receives an \gls{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
+The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{terminal} in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the \gls{terminal} to the default cooked state.
 
 
 \chapter{Implementation}\label{chp:Implementation}
@@ -407,7 +419,7 @@ for {
 }
 \end{lstlisting}
 
-Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{unix} provides the necessary wrapper functions, which can be used instead.\\
+Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{Unix} provides the necessary wrapper functions, which can be used instead.\\
 The obvious drawback: Having to rely on a \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
 
 
