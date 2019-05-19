@@ -1,18 +1,18 @@
 \newcommand{\FullGlossaryEntry}[7]{%Abkz., Typ, Name, Name(plural), Beschr., Beschr.(plural), Erkl.
 \newglossaryentry{#1}{type=\acronymtype,
-name={#3},
-plural={#4},
-description={\textit{#5}},
-%first={\textit{#5}(later referred to as #3)\glsadd{_#1}},
-%firstplural={\textit{#6}(later referred to as #4)\glsadd{_#1}},
-first={#5(#3)\glsadd{_#1}},
-firstplural={#6(#4)\glsadd{_#1}},
-see=[See]{_#1}
+	name={#3},
+	plural={#4},
+	description={\textit{#5}},
+	%first={\textit{#5}(later referred to as #3)\glsadd{_#1}},
+	%firstplural={\textit{#6}(later referred to as #4)\glsadd{_#1}},
+	first={#5(#3)\glsadd{_#1}},
+	firstplural={#6(#4)\glsadd{_#1}},
+	see=[See]{_#1}
 }
 \longnewglossaryentry{_#1}{type=#2,
-name={#5},
-plural={#6}
-}{\hspace{0pt}\\#7}
+	name={#5},
+	plural={#6}
+	}{\hspace{0pt}\\#7}
 }
 
 
@@ -120,12 +120,12 @@ firstplural={Operating Systems(OSes)}
 \FullGlossaryEntry{tty}{main}%
 {tty}{ttys}%
 {teletype}{teletypes}%
-{Originally a device that could send and receive text messages. Nowadays \gls{tty} refers to \glspl{terminal}, which emulate that behaviour.}
+{Originally a device that could send and receive text messages. Nowadays \gls{tty} refers to \glspl{terminal}, which emulate that behaviour\citep{tty}.}
 
 \FullGlossaryEntry{pty}{main}%
 {pty}{ptys}%
 {pseudoterminal}{pseudoterminals}%
-{A mechanism of \gls{Unix} to allow programs to communicate as if the other was inside a \gls{tty}.}
+{A mechanism of \gls{Unix} to allow programs to communicate as if the other was inside a \gls{tty}\citep{pty}.}
 
 \FullGlossaryEntry{ptm}{main}%
 {ptm}{ptms}%
@@ -135,7 +135,7 @@ firstplural={Operating Systems(OSes)}
 \FullGlossaryEntry{pts}{main}%
 {pts}{pts's}%
 {pseudoterminal slave}{pseudoterminal slaves}%
-{The slave of a \gls{pty}.}
+{The slave of a \gls{pty}\citep{pts}.}
 
 \FullGlossaryEntry{SIGINT}{main}%
 {SIGINT}{SIGINTs}%

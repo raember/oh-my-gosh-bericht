@@ -257,13 +257,13 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
 \section{Pseudoterminal}\label{sec:Pseudoterminal}
-\glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal}(see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).
+\glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal}(see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).\\
+A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to. Therefore the \gls{fd} it is connected to should behave like a real \gls{terminal}. This is where \glspl{pty} come into play.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalProblem}
 \caption{How to operate a \gls{tty}-oriented program over a network?\citep[p.1376]{KerriskTLPI}}
 \label{fig:HowToOperateTtyOrientedProgramOverNetwork}
 \end{figure}
-A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to. Therefore the \gls{fd} it is connected to should behave like a real \gls{terminal}. This is where \glspl{pty} come into play.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{Pseudoterminal}
 \caption{Two programs communicating via a \gls{pty}\citep[p.1377]{KerriskTLPI}}
