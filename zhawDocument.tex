@@ -139,7 +139,8 @@ However, this lead to a few problems in the implementation process(See \ref{sec:
 
 \section{Secure Connection}\label{sec:DesignSecureConnection}
 When building an application that communicates via the network, certain security measures are mandatory to ensure a secure communication. If such measures are not taken, the communication between the client and the server can be fully read and even altered by a third party. To prevent this, the communication can be encrypted with \gls{TLS}(originally known as \gls{SSL}). Today's state-of-the-art is \gls{TLS} 1.3\citep{rfc8446}.\\
-When connecting, the client checks the server \gls{X.509}-certificate of the server to authenticate the peer. Optionally, the client can also authenticate himself to the server. After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key. After this, every message can be transferred between client and server in an encrypted way.
+When connecting, the client checks the server \gls{X.509}-certificate of the server to authenticate the peer. Optionally, the client can also authenticate himself to the server. After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key. After this, every message can be transferred between client and server in an encrypted way.\\
+Explanations about the implementation can be found in \ref{sec:ImplSecureConnection}.
 
 \section{Authentication via PAM}\label{sec:DesignAuthViaPAM}
 For authentication of users on Linux systems, \gls{PAM} exists. I provides a clean separation between a program and the sensitive part of authentication. \gls{PAM} operates using transactions, which represent a link to a \gls{PAM} context. Using this transaction, an application can do various actions regarding account management, authentication or session management. To initialize such a context and transaction, an application has to call the \cite{pam_start} function.
@@ -199,12 +200,14 @@ Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that 
 int pam_setcred(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.
+Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.\\
+The implementation differs from this approach slightly. See \ref{sec:ImplAuthViaPAM}.
 
 \section{Authentication via Keys}\label{sec:DesignAuthViaKeys}
 A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.\\
 When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication. If it matches, the server encrypts a random secret(with high entropy) with the public key to the user. The user decrypts the message with his private key and sends it back to the server. If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.\\
-This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
+This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.\\
+The implementation of this feature also differs from the original design, as can be read in \ref{sec:ImplAuthViaKeys}).
 
 \section{Post-Login Actions}\label{sec:DesignPostLoginActions}
 When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.\\
@@ -358,15 +361,36 @@ The client performs the transfer of the environment variables until it receives 
 
 
 \chapter{Implementation}\label{chp:Implementation}
-\notes{
-\item (Beschreibt die Grundüberlegungen der realisierten Lösung (Konstruktion/Entwurf) und die Realisierung als Simulation, als Prototyp oder als Software-Komponente)
-\item (Definiert Messgrössen, beschreibt Mess- oder Versuchsaufbau, beschreibt und dokumentiert Durchführung der Messungen/Versuche)
-\item (Experimente)
-\item (Lösungsweg)
-\item (Modell)
-\item (Tests und Validierung)
-\item (Theoretische Herleitung der Lösung)
+\section{Secure Connection}\label{sec:ImplSecureConnection}
+As described in \ref{sec:DesignSecureConnection}, \gls{TLS} was used to secure the connection between the client and the server. For this, the \gls{Go}-package \texttt{crypto/tls} has been used. This package requires both client and server to extend the \texttt{GODEBUG} variable with a flag to activate support for \gls{TLS} 1.3:
+\setlistingGo
+\begin{lstlisting}[caption={Activating \gls{TLS} 1.3 in \gls{Go}},label=lst:TlsInGo]
+func init() {
+    os.Setenv("GODEBUG", os.Getenv("GODEBUG")+",tls13=1")
 }
+\end{lstlisting}
+The server-side of the solution has to have a certificate, which has to be generated newly when actually installing the solution on a machine. For testing purposes, a self-signed certificate was created using \cite{openssl}:
+\setlistingBash
+\begin{lstlisting}[caption={Generating a self-signed certificate and private key},label=lst:GenCertNKey]
+openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+\end{lstlisting}
+The files \texttt{key.pem} and \texttt{certificate.pem} can be found inside the \texttt{test} folder in the project's root folder.\\
+The current implementation is set to skip verification of insecure certificates. Handling such a case has been decided to be handled in future improvements.
+
+\section{Authentication via PAM}\label{sec:ImplAuthViaPAM}
+There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM}(refer to \ref{sec:DesignAuthViaPAM}). In earlier stages of the project, a wrapper from \cite{gopam} has been used. However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions(see \ref{sec:DesignPostLoginActions} and \ref{ssec:DesignLoginAccountingWithPAM}).
+
+\section{Authentication via Keys}\label{sec:ImplAuthViaKeys}
+The authentication via keys has been implemented with \ref{sec:DesignAuthViaKeys} in mind but with some alterations.\\
+The first change was to store the public key in a plain text format, which was done out of convenience and can be changed in the future. Not storing the hashed public key doesn't pose any security threat, so fixing this deviation was deemed of low priority.\\
+The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory. This is a sub-optimal approach, as his requires users to store their public keys in the superuser's directory, which can lead to mistakes. This will be fixed in the future.\\
+To test the application, a test user was created and given a key pair which was created as follows using \cite{openssl}:
+\setlistingBash
+\begin{lstlisting}[caption={Generating a key pair for the client},label=lst:GenClientKeyPair]
+openssl genpkey -out client.pem -algorithm rsa -pkeyopt rsa_keygen_bits:2048
+openssl rsa -in client.pem -out client.pub -pubout
+\end{lstlisting}
+
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
 To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
@@ -408,7 +432,7 @@ if err != nil {
 fd := file.Fd()
 \end{lstlisting}
 
-However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from it fails.\\
+However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from, fails.\\
 This had some implications for the project: The listener on the server could not be created with the high-level like:
 \setlistingGo
 \begin{lstlisting}[caption={\gls{Go}s high level \gls{API} for listener},label=lst:ListenForConn]

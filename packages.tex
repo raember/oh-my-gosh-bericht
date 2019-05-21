@@ -99,6 +99,13 @@
 		%otherkeywords = {...},
 		%deletekeywords = {...},
 	}}
+	\newcommand{\setlistingBash}{
+		\lstset{
+		style = basestyle,
+		language = Bash,
+		%otherkeywords = {...},
+		%deletekeywords = {...},
+	}}
 \usepackage{xstring}
 	\newcommand{\inlist}[2]{
 		\IfSubStr{,#2,}{,\arabic{#1},}{\color{lgray!95!blue}}{\color{lgray}}
