@@ -200,7 +200,7 @@ Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that 
 int pam_setcred(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.\\
+Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:DesignLoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.\\
 The implementation differs from this approach slightly. See \ref{sec:ImplAuthViaPAM}.
 
 \section{Authentication via Keys}\label{sec:DesignAuthViaKeys}
@@ -354,7 +354,7 @@ The new and current design of the architecture can be seen in figure \ref{fig:Se
 \label{fig:SeqDiaCurrent}
 \end{figure}
 
-This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:AuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
+This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:DesignAuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
 If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.\\
 If the \gls{shell} exits or the host process receives an \gls{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
 The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{terminal} in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the \gls{terminal} to the default cooked state.
@@ -391,13 +391,27 @@ openssl genpkey -out client.pem -algorithm rsa -pkeyopt rsa_keygen_bits:2048
 openssl rsa -in client.pem -out client.pub -pubout
 \end{lstlisting}
 
+\section{Post-Login Actions}\label{sec:ImplPostLoginActions}
+The current implementation either outsources the post-login actions described in \ref{sec:DesignPostLoginActions} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}. The implementation of this feature is not part of the current project.
+
+\section{Terminal Mode}\label{sec:ImplTerminalMode}
+Setting the \gls{terminal} mode in \gls{Go} can be achieved with the functionality of the x-package \linebreak\texttt{golang.org/x/crypto/ssh/terminal}:
+\setlistingGo
+\begin{lstlisting}[caption={Setting the \gls{terminal} mode in \gls{Go}},label=lst:GoTermMode]
+oldState, err := terminal.MakeRaw(0)
+if err != nil {
+	panic(err)
+}
+defer terminal.Restore(0, oldState)
+\end{lstlisting}
+
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
 To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
 In theory, this should have enabled the program to use \gls{Go}s standard library capabilities to handle connections. However, there were several problems with this approach:
 
 \subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
-The \gls{Go} standard library does not support the classical \gls{C}-like forking. It only has a \texttt{syscall.ForkExec} method, which is documented as:
+The \gls{Go} standard library does not support the classical \gls{C}-like forking. It only has a \texttt{syscall.\linebreak{}ForkExec} method, which is documented as:
 \begin{quote}
 Combination of fork and exec, careful to be thread safe.
 \end{quote}
