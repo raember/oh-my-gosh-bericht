@@ -45,6 +45,8 @@ This bachelor thesis was proposed by Dr. Stephan Neuhaus \citep{BA19_neut_03} an
 
 On this note I would like to thank \gls{ZHAW} for granting me the opportunity to do my Bachelors thesis here and Dr. Stephan Neuhaus for helping me along the way of this Bachelors thesis.
 
+As an additional remark, I would like to point out that the team for this Bachelors thesis originally consisted of two people, but after some months of uncertainty, Mr Schwarz decided to opt out of the project as he said he underestimated the workload from the modules he booked on top of the Bachelors thesis. This happened halfway through the project and had great impact on the project itself. The rest of this project was finished by me, Raphael Emberger.
+
 \makedeclarationoforiginality
 
 \tableofcontents
@@ -131,11 +133,15 @@ Incorporating the following components will improve the grade:
 This thesis has been worded with technically literate readers in mind. However: For core concepts and special terms, a glossary can be found at \ref{sec:Glossary}. Used acronyms are listed in \ref{sec:AcronymGlossary}.
 
 \chapter{Design}\label{chp:Design}
-\section{Implementation Language}\label{sec:ImplementationLanguage}
+\section{Implementation Language}\label{sec:DesignImplementationLanguage}
 In the beginning of the project, Dr Neuhaus suggested the use of \gls{Go} as a modern low-level language over interpreted languages for considerations of security. He emphasized that the use of other low-level languages(like \gls{C} or \gls{C++}) was permissible. In the end the project was implemented in \gls{Go} as suggested.\\
 However, this lead to a few problems in the implementation process(See \ref{sec:Problems}).
 
-\section{Authentication via PAM}\label{sec:AuthViaPAM}
+\section{Secure Connection}\label{sec:DesignSecureConnection}
+When building an application that communicates via the network, certain security measures are mandatory to ensure a secure communication. If such measures are not taken, the communication between the client and the server can be fully read and even altered by a third party. To prevent this, the communication can be encrypted with \gls{TLS}(originally known as \gls{SSL}). Today's state-of-the-art is \gls{TLS} 1.3\citep{rfc8446}.\\
+When connecting, the client checks the server \gls{X.509}-certificate of the server to authenticate the peer. Optionally, the client can also authenticate himself to the server. After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key. After this, every message can be transferred between client and server in an encrypted way.
+
+\section{Authentication via PAM}\label{sec:DesignAuthViaPAM}
 For authentication of users on Linux systems, \gls{PAM} exists. I provides a clean separation between a program and the sensitive part of authentication. \gls{PAM} operates using transactions, which represent a link to a \gls{PAM} context. Using this transaction, an application can do various actions regarding account management, authentication or session management. To initialize such a context and transaction, an application has to call the \cite{pam_start} function.
 \setlistingC
 \begin{lstlisting}[caption={Initializing a \gls{PAM} context},label=lst:InitPAMContext]
@@ -195,12 +201,12 @@ int pam_setcred(pam_handle_t *pamh, int flags);
 
 Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:LoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.
 
-\section{Authentication via Keys}\label{sec:AuthViaKeys}
+\section{Authentication via Keys}\label{sec:DesignAuthViaKeys}
 A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.\\
 When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication. If it matches, the server encrypts a random secret(with high entropy) with the public key to the user. The user decrypts the message with his private key and sends it back to the server. If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.\\
 This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
 
-\section{Post-Login Actions}\label{sec:PostLoginActions}
+\section{Post-Login Actions}\label{sec:DesignPostLoginActions}
 When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.\\
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage. The \texttt{utmpx} \gls{API} offers appropriate functions. The \texttt{utmpx} struct represents a single entry in those files:
 \setlistingC
@@ -243,7 +249,7 @@ struct utmp *getutline(const struct utmp *ut);
 struct utmp *pututline(const struct utmp *ut);
 \end{lstlisting}
 
-\subsection{Login Accounting with PAM}\label{ssec:LoginAccountingWithPAM}
+\subsection{Login Accounting with PAM}\label{ssec:DesignLoginAccountingWithPAM}
 \gls{PAM} supports binding login accounting to its own session functions \cite{pam_open_session} and \cite{pam_close_session}:
 \setlistingC
 \begin{lstlisting}[caption={\gls{PAM} session management},label=lst:PAMSessionManagement]
@@ -253,10 +259,10 @@ int pam_open_session(pam_handle_t *pamh, int flags);
 int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-\section{Terminal Mode}\label{sec:TerminalMode}
+\section{Terminal Mode}\label{sec:DesignTerminalMode}
 The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
-\section{Pseudoterminal}\label{sec:Pseudoterminal}
+\section{Pseudoterminal}\label{sec:DesignPseudoterminal}
 \glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal}(see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).\\
 A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to. Therefore the \gls{fd} it is connected to should behave like a real \gls{terminal}. This is where \glspl{pty} come into play.
 \begin{figure}[ht]
@@ -289,7 +295,7 @@ With the \gls{pty} properly set up, a child bound to the \gls{pts} side will ass
 \end{figure}
 
 \newpage
-\section{Flow of Action}\label{sec:FlowOfAction}
+\section{Flow of Action}\label{sec:DesignFlowOfAction}
 To create a client-server protocol for remote log in and interactive sessions, a clear cut architecture is mandatory. The flow of a typical use case should look like this:
 
 \begin{enumerate}
