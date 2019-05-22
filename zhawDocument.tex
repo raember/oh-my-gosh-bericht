@@ -209,7 +209,28 @@ When starting an authentication, the user sends his public key to the server, wh
 This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.\\
 The implementation of this feature also differs from the original design, as can be read in \ref{sec:ImplAuthViaKeys}).
 
-\section{Post-Login Actions}\label{sec:DesignPostLoginActions}
+\section{User Data Querying}\label{sec:DesignUserDataQuerying}
+To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required. This and other information can be found inside the \texttt{/etc/passwd} file. The file holds information about a users login-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory. to spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully login a user. To query such data, \gls{Unix} offers \cite{getpw}, which doesn't just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist. This has been used in the implementaion phase(see \ref{sec:ImplUserDataQuerying}):
+\setlistingC
+\begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
+#include <sys/types.h>
+#include <pwd.h>
+
+struct passwd {
+	char   *pw_name;       /* username */
+	char   *pw_passwd;     /* user password */
+	uid_t   pw_uid;        /* user ID */
+	gid_t   pw_gid;        /* group ID */
+	char   *pw_gecos;      /* user information */
+	char   *pw_dir;        /* home directory */
+	char   *pw_shell;      /* shell program */
+};
+
+struct passwd *getpwnam(const char *name);
+struct passwd *getpwuid(uid_t uid);
+\end{lstlisting}
+
+\section{Login Accounting}\label{sec:DesignLoginAccounting}
 When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.\\
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage. The \texttt{utmpx} \gls{API} offers appropriate functions. The \texttt{utmpx} struct represents a single entry in those files:
 \setlistingC
@@ -238,7 +259,7 @@ struct utmpx {
 };
 \end{lstlisting}
 
-On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{ùtmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
+On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
 Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended. This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.\\
 A program can also query the \texttt{utmp} file with the according getters.
 \setlistingC
@@ -378,7 +399,7 @@ The files \texttt{key.pem} and \texttt{certificate.pem} can be found inside the 
 The current implementation is set to skip verification of insecure certificates. Handling such a case has been decided to be handled in future improvements.
 
 \section{Authentication via PAM}\label{sec:ImplAuthViaPAM}
-There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM}(refer to \ref{sec:DesignAuthViaPAM}). In earlier stages of the project, a wrapper from \cite{gopam} has been used. However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions(see \ref{sec:DesignPostLoginActions} and \ref{ssec:DesignLoginAccountingWithPAM}).
+There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM}(refer to \ref{sec:DesignAuthViaPAM}). In earlier stages of the project, a wrapper from \cite{gopam} has been used. However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions(see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}).
 
 \section{Authentication via Keys}\label{sec:ImplAuthViaKeys}
 The authentication via keys has been implemented with \ref{sec:DesignAuthViaKeys} in mind but with some alterations.\\
@@ -391,8 +412,11 @@ openssl genpkey -out client.pem -algorithm rsa -pkeyopt rsa_keygen_bits:2048
 openssl rsa -in client.pem -out client.pub -pubout
 \end{lstlisting}
 
-\section{Post-Login Actions}\label{sec:ImplPostLoginActions}
-The current implementation either outsources the post-login actions described in \ref{sec:DesignPostLoginActions} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}. The implementation of this feature is not part of the current project.
+\section{User Data Querying}\label{sec:ImplUserDataQuerying}
+Querying user data(see \ref{sec:DesignUserDataQuerying}) has been originally been implemented by using a private package that parsed the \texttt{passwd} file. In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines.
+
+\section{Login Accounting}\label{sec:ImplLoginAccounting}
+The current implementation either outsources the post-login actions described in \ref{sec:DesignLoginAccounting} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}. The implementation of this feature is not part of the current project.
 
 \section{Terminal Mode}\label{sec:ImplTerminalMode}
 Setting the \gls{terminal} mode in \gls{Go} can be achieved with the functionality of the x-package \linebreak\texttt{golang.org/x/crypto/ssh/terminal}:
@@ -405,10 +429,34 @@ if err != nil {
 defer terminal.Restore(0, oldState)
 \end{lstlisting}
 
+\section{Pseudoterminal}\label{sec:ImplPseudoterminal}
+\gls{Go} does have a wrapper for \glspl{pty} in an official package, but the code is inside an internal package, called \texttt{os/signal/internal/pty}, which uses \gls{CGo} to call the required \gls{API} routines described in \ref{sec:DesignPseudoterminal}:
+\setlistingGo
+\begin{lstlisting}[caption={\gls{Go}'s \gls{pty} wrapper},label=lst:GoPty]
+// Open returns a master pty and the name of the linked slave tty.
+func Open() (master *os.File, slave string, err error) {
+	m, err := C.posix_openpt(C.O_RDWR)
+	if err != nil {
+		return nil, "", ptyError("posix_openpt", err)
+	}
+	if _, err := C.grantpt(m); err != nil {
+		C.close(m)
+		return nil, "", ptyError("grantpt", err)
+	}
+	if _, err := C.unlockpt(m); err != nil {
+		C.close(m)
+		return nil, "", ptyError("unlockpt", err)
+	}
+	slave = C.GoString(C.ptsname(m))
+	return os.NewFile(uintptr(m), "pty-master"), slave, nil
+}
+\end{lstlisting}
+For the project, this code has been altered to better fit the flow of the application.
+
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
 To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
-In theory, this should have enabled the program to use \gls{Go}s standard library capabilities to handle connections. However, there were several problems with this approach:
+In theory, this should have enabled the program to use \gls{Go}'s standard library capabilities to handle connections. However, there were several problems with this approach:
 
 \subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
 The \gls{Go} standard library does not support the classical \gls{C}-like forking. It only has a \texttt{syscall.\linebreak{}ForkExec} method, which is documented as:
@@ -449,7 +497,7 @@ fd := file.Fd()
 However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from, fails.\\
 This had some implications for the project: The listener on the server could not be created with the high-level like:
 \setlistingGo
-\begin{lstlisting}[caption={\gls{Go}s high level \gls{API} for listener},label=lst:ListenForConn]
+\begin{lstlisting}[caption={\gls{Go}'s high level \gls{API} for listener},label=lst:ListenForConn]
 ln, err := net.Listen("tcp", ":8080")
 if err != nil {
 	// handle error
@@ -465,7 +513,6 @@ for {
 
 Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{Unix} provides the necessary wrapper functions, which can be used instead.\\
 The obvious drawback: Having to rely on a \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
-
 
 
 \chapter{Results}\label{chp:Results}
