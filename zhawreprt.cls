@@ -48,7 +48,7 @@
 	\setlength{\TPHorizModule}{30mm}
 	\setlength{\TPVertModule}{\TPHorizModule}
 	\textblockorigin{10mm}{10mm}
-	\setlength{\parindent}{0pt}
+	\setlength{\parindent}{10pt}
 \RequirePackage{pdflscape}
 \RequirePackage{pdfpages}
 \RequirePackage{makeidx}

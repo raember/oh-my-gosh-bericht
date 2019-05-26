@@ -1,16 +1,10 @@
 %%	build-queue:
 %%	
-%%	¦¦¦ very first run. No .ist files yet
-%%	¦¦	index, citation/bibliography or glossary changed
-%%	¦	every change apart from the above mentioned. Double run for labels and toc.
-%%	
-%%	¦¦¦xelatex
-%%	¦¦makeglossaries
-%%	¦¦makeindex
-%%	¦¦bibtex
-%%	¦xelatex
-%%	¦xelatex
-%%	
+%%	xelatex (first run)
+%%	bibtex (references changed)
+%%	xelatex (re-run)
+%%	xelatex (update labels, show references)
+%%	xelatex (update back-references)
 
 \RequirePackage[l2tabu,orthodox]{nag}
 \documentclass[10pt,a4paper,titlepage,twoside,english,final]{zhawreprt}
@@ -31,7 +25,7 @@
 
 
 \chapter*{Preface}\label{sec:Preface}
-\notes{\item Stellt den persönlichen Bezug zur Arbeit dar und spricht Dank aus.}
+% Stellt den persönlichen Bezug zur Arbeit dar und spricht Dank aus
 The \gls{SSH} protocol \citep{rfc253,rfc6668,rfc8268,rfc8308,rfc8332} is a system that allows a user to log in on a remote machine and perform tasks on that remote machine via a \gls{CLI}. \gls{SSH} is widely known and used in everyday tasks. However: It is now over twelve years old in its current form. One of the problems with \gls{SSH} is its complexity, both in the initial phase when key material is exchanged, but also later, for example because the server must always decide whether to return a character that has been sent to it or not (echo).
 
 The goal of this work is a radically simplified protocol, which in its functions is similar to \gls{SSH} (N.B. the similarity concerns the functions, not necessarily the protocol details). I develop the protocol, as well as a client and a server - all in \gls{Go}. I demonstrate that the software can replace \gls{SSH} by showing that it can handle several common use cases, among them:
@@ -53,23 +47,25 @@ As an additional remark, I would like to point out that the team for this Bachel
 
 \chapter{Introduction}\label{chp:Introduction}
 \section{Initial Position}\label{sec:InitialPosition}
-\notes{
-\item Nennt bestehende Arbeiten/Literatur zum Thema -> Literaturrecherche
-\item Stand der Technik: Bisherige Lösungen des Problems und deren Grenzen
-\item (Nennt kurz den Industriepartner und/oder weitere Kooperationspartner und dessen/deren Interesse am Thema Fragestellung)
-}
+% Nennt bestehende Arbeiten/Literatur zum Thema -> Literaturrecherche
+% Stand der Technik: Bisherige Lösungen des Problems und deren Grenzen
+% (Nennt kurz den Industriepartner und/oder weitere Kooperationspartner und dessen/deren Interesse am Thema Fragestellung)
 There was no thesis done on this subject that could have been used as reference. There are however several software projects that deal with a similar problem.
 
 \subsection{OpenSSH}\label{ssec:OpenSSH}
-The most noteworthy work to mention is of course \gls{SSH} itself. \cite{openssh} is the name of the open source project which provides millions of administrators and developers with the ability to securely connect to a remote host. It replaces the up until then widely used protocols like \cite{telnet}(see \ref{ssec:Telnet}) and \cite{rlogin}/\cite{rsh}(see \ref{ssec:BerkeleyRCommands}).\\
-\gls{SSH} uses \gls{TLS} to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.\\
-\gls{SSH}s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{terminal} on that machine.
-It can also forward traffic on local ports to the remote host through the secure channel. This is also used by third party programs such as \cite{rsync}.\\
-When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}. Another feature is whitelisting of clients via their public keys, which barres intrusion via hijacked user-password-credentials.\\
+The most noteworthy work to mention is of course \gls{SSH} itself. \cite{openssh} is the name of the open source project which provides millions of administrators and developers with the ability to securely connect to a remote host. It replaces the up until then widely used protocols like \cite{telnet}(see \ref{ssec:Telnet}) and \cite{rlogin}/\cite{rsh}(see \ref{ssec:BerkeleyRCommands}).
+
+\gls{SSH} uses an own protocol to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.
+
+\gls{SSH}s' features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{terminal} on that machine.
+It can also forward traffic on local ports to the remote host through the secure channel. This is also used by third party programs such as \cite{rsync}.
+
+When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}. Another feature is whitelisting of clients via their public keys, which stops intrusion attempts via hijacked user-password-credentials.
+
 After a secure connection could be established, there are multiple possibilities to use the opened channel. One is to forward the \gls{GUI} of a remote program to the client. Another one is to use this channel to tunnel more connections through it: For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host. This can obscure and secure this traffic between the host and the server.
 
 \subsection{Telnet}\label{ssec:Telnet}
-Telnet\citep{rfc15,rfc854} is an old(1969) and deprecated communication protocol which doesn't feature any security. However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.\\
+Telnet\citep{rfc15,rfc854} is an old (1969) and deprecated communication protocol which doesn't feature any security. However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.
 Telnet still has 23 as its very own \gls{port} assigned to it.
 \subsubsection{Go-Telnet}
 Go-Telnet\citep{gotelnet} is a \gls{TELNETS} supporting client-server-application which has been implemented in \gls{Go}.
@@ -77,34 +73,40 @@ Go-Telnet\citep{gotelnet} is a \gls{TELNETS} supporting client-server-applicatio
 \subsection{Berkeley r-commands}\label{ssec:BerkeleyRCommands}
 The Berkley r-commands are a set of commands to do certain tasks on remote hosts. Those tasks are similar to their counterparts without a leading "\texttt{r}".
 \begin{itemize}
-\item \cite{rlogin}\\
+\item \cite{rlogin}
+
 This command connects to the host and performs a \cite{login} command, which includes authentication and if successful, spawning a user \gls{shell}.
-\item \cite{rsh}\\
+\item \cite{rsh}
+
 \texttt{rsh} spawns a \gls{shell} without the log in process.
-\item \cite{rexec}\\
+\item \cite{rexec}
+
 With this command, the user can log in to a remote machine and execute one command.
-\item \cite{rcp}\\
+\item \cite{rcp}
+
 Using this command gives the user the ability to copy from and to a remote host.
-\item \cite{rwho}\\
+\item \cite{rwho}
+
 This command tells the user what users are currently logged in on the remote machine.
-\item \cite{rstat}\\
+\item \cite{rstat}
+
 \texttt{rstat} displays file system information from remote hosts.
-\item \cite{ruptime}\\
+\item \cite{ruptime}
+
 With this command, the user can see the uptime, number of logged in users and current work load of the remote machine.
 \end{itemize}
 
 
 \section{Task}\label{sec:Task}
-\notes{
-\item Formuliert das Ziel der Arbeit
-\item Verweist auf die offizielle Aufgabenstellung des/der Dozierenden im Anhang
-\item (Pflichtenheft, Spezifikation)
-\item (Spezifiziert die Anforderungen an das Resultat der Arbeit)
-\item (Übersicht über die Arbeit: stellt die folgenden Teile der Arbeit kurz vor)
-\item (Angaben zum Zielpublikum: nennt das für die Arbeit vorausgesetzte Wissen)
-\item (Terminologie: Definiert die in der Arbeit verwendeten Begriffe)
-}
-The official formulation of the tasks can be found in the appendix \ref{ssec:OfficialStatementOfTasks}.\\
+% Formuliert das Ziel der Arbeit
+% Verweist auf die offizielle Aufgabenstellung des/der Dozierenden im Anhang
+% (Pflichtenheft, Spezifikation)
+% (Spezifiziert die Anforderungen an das Resultat der Arbeit)
+% (Übersicht über die Arbeit: stellt die folgenden Teile der Arbeit kurz vor)
+% (Angaben zum Zielpublikum: nennt das für die Arbeit vorausgesetzte Wissen)
+% (Terminologie: Definiert die in der Arbeit verwendeten Begriffe)
+The official formulation of the tasks can be found in the appendix \ref{ssec:OfficialStatementOfTasks}.
+
 The objective of this thesis is as follows:
 \begin{itemize}
 \item Design and implementation of a client-server protocol that can manage interactive sessions.
@@ -134,12 +136,15 @@ This thesis has been worded with technically literate readers in mind. However: 
 
 \chapter{Design}\label{chp:Design}
 \section{Implementation Language}\label{sec:DesignImplementationLanguage}
-In the beginning of the project, Dr Neuhaus suggested the use of \gls{Go} as a modern low-level language over interpreted languages for considerations of security. He emphasized that the use of other low-level languages(like \gls{C} or \gls{C++}) was permissible. In the end the project was implemented in \gls{Go} as suggested.\\
-However, this lead to a few problems in the implementation process(See \ref{sec:Problems}).
+In the beginning of the project, Dr Neuhaus suggested the use of \gls{Go} as a modern low-level language over interpreted languages for considerations of security. He emphasized that the use of other low-level languages (like \gls{C} or \gls{C++}) was permissible. In the end the project was implemented in \gls{Go} as suggested.
+
+However, this lead to a few problems in the implementation process (See \ref{sec:Problems}).
 
 \section{Secure Connection}\label{sec:DesignSecureConnection}
-When building an application that communicates via the network, certain security measures are mandatory to ensure a secure communication. If such measures are not taken, the communication between the client and the server can be fully read and even altered by a third party. To prevent this, the communication can be encrypted with \gls{TLS}(originally known as \gls{SSL}). Today's state-of-the-art is \gls{TLS} 1.3\citep{rfc8446}.\\
-When connecting, the client checks the server \gls{X.509}-certificate of the server to authenticate the peer. Optionally, the client can also authenticate himself to the server. After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key. After this, every message can be transferred between client and server in an encrypted way.\\
+When building an application that communicates via the network, certain security measures are mandatory to ensure a secure communication. If such measures are not taken, the communication between the client and the server can be fully read and even altered by a third party. To prevent this, the communication can be encrypted with \gls{TLS} (originally known as \gls{SSL}). Today's state-of-the-art is \gls{TLS} 1.3\citep{rfc8446}.
+
+When connecting, the client checks the server \gls{X.509}-certificate of the server to authenticate the peer. Optionally, the client can also authenticate himself to the server. After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key. After this, every message can be transferred between client and server in an encrypted way.
+
 Explanations about the implementation can be found in \ref{sec:ImplSecureConnection}.
 
 \section{Authentication via PAM}\label{sec:DesignAuthViaPAM}
@@ -174,7 +179,7 @@ Similarly, the created context has to be terminated with \cite{pam_end}
 int pam_end(pam_handle_t *pamh, int pam_status);
 \end{lstlisting}
 
-After creating a context, the application can prepare the transaction with \cite{pam_set_item} and \cite{pam_get_item}. Using those function, fields like \texttt{PAM\_RUSER} and \texttt{PAM\_RHOST}, which together(\texttt{PAM\_RUSER@PAM\_RHOST}) represent the requesting user(remote or local). If in any of the prior or later steps any errors occur, the corresponding error message can be received with \cite{pam_strerror}.
+After creating a context, the application can prepare the transaction with \cite{pam_set_item} and \cite{pam_get_item}. Using those function, fields like \texttt{PAM\_RUSER} and \texttt{PAM\_RHOST}, which together (\texttt{PAM\_RUSER@PAM\_RHOST}) represent the requesting user (remote or local). If in any of the prior or later steps any errors occur, the corresponding error message can be received with \cite{pam_strerror}.
 \setlistingC
 \begin{lstlisting}[caption={\gls{PAM} functions},label=lst:PAMFunctions]
 #include <security/pam_appl.h>
@@ -200,17 +205,21 @@ Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that 
 int pam_setcred(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-Now the application can do other \gls{PAM} related actions like session management(see \ref{ssec:DesignLoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.\\
+Now the application can do other \gls{PAM} related actions like session management (see \ref{ssec:DesignLoginAccountingWithPAM}). To finish, the application terminates the context properly and all associated memory gets invalidated.
+
 The implementation differs from this approach slightly. See \ref{sec:ImplAuthViaPAM}.
 
 \section{Authentication via Keys}\label{sec:DesignAuthViaKeys}
-A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.\\
-When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication. If it matches, the server encrypts a random secret(with high entropy) with the public key to the user. The user decrypts the message with his private key and sends it back to the server. If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.\\
-This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.\\
+A user can also authenticate himself without a password but instead using public key cryptography. For this, a user has to create a key pair consisting of a private and a public key. Before the actual authentication, a hashed version of the public key has to be stored on the server.
+
+When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication. If it matches, the server encrypts a random secret (with high entropy) with the public key to the user. The user decrypts the message with his private key and sends it back to the server. If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.
+
+This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
+
 The implementation of this feature also differs from the original design, as can be read in \ref{sec:ImplAuthViaKeys}).
 
 \section{User Data Querying}\label{sec:DesignUserDataQuerying}
-To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required. This and other information can be found inside the \texttt{/etc/passwd} file. The file holds information about a users login-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory. to spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully login a user. To query such data, \gls{Unix} offers \cite{getpw}, which doesn't just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist. This has been used in the implementaion phase(see \ref{sec:ImplUserDataQuerying}):
+To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required. This and other information can be found inside the \texttt{/etc/passwd} file. The file holds information about a users login-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory. to spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully login a user. To query such data, \gls{Unix} offers \cite{getpw}, which doesn't just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist. This has been used in the implementaion phase (see \ref{sec:ImplUserDataQuerying}):
 \setlistingC
 \begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
 #include <sys/types.h>
@@ -231,7 +240,8 @@ struct passwd *getpwuid(uid_t uid);
 \end{lstlisting}
 
 \section{Login Accounting}\label{sec:DesignLoginAccounting}
-When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.\\
+When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.
+
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage. The \texttt{utmpx} \gls{API} offers appropriate functions. The \texttt{utmpx} struct represents a single entry in those files:
 \setlistingC
 \begin{lstlisting}[caption={Definition of the utmpx structure {\citep[p.819]{KerriskTLPI}}},label=lst:UtmpxDefinition]
@@ -259,8 +269,10 @@ struct utmpx {
 };
 \end{lstlisting}
 
-On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} struct to \texttt{USER\_PROCESS} to mark a user login.\\
-Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended. This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.\\
+On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in. If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended. A call to \cite{pututxline} should suffice in performing these steps properly. The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} struct to \texttt{USER\_PROCESS} to mark a user login.
+
+Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended. This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.
+
 A program can also query the \texttt{utmp} file with the according getters.
 \setlistingC
 \begin{lstlisting}[caption={\texttt{utmpx} \gls{API} functions},label=lst:UtmpxApiFunctions]
@@ -287,7 +299,8 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
 \section{Pseudoterminal}\label{sec:DesignPseudoterminal}
-\glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal}(see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).\\
+\glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal} (see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).
+
 A \gls{shell} expects to be connected to a full fledged \gls{tty}(or a \gls{tty} emulator). To check whether it is inside such an environment, it uses \cite{isatty} on the \gls{fd} it is connected to. Therefore the \gls{fd} it is connected to should behave like a real \gls{terminal}. This is where \glspl{pty} come into play.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalProblem}
@@ -339,7 +352,8 @@ However, there are multiple security concerns to be satiated:
 \item The Server has to spawn the login \gls{shell} of the logged in user with the appropriate rights.
 \end{enumerate}
 
-Furthermore, the current design does not allow for multiple sessions to be run parallel. Therefore it was decided to spawn a new process to handle everything beginning after the connection has been established.\\
+Furthermore, the current design does not allow for multiple sessions to be run parallel. Therefore it was decided to spawn a new process to handle everything beginning after the connection has been established.
+
 This lead to  the following general flow of actions:
 
 \begin{enumerate}
@@ -375,10 +389,13 @@ The new and current design of the architecture can be seen in figure \ref{fig:Se
 \label{fig:SeqDiaCurrent}
 \end{figure}
 
-This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:DesignAuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.\\
-If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.\\
-If the \gls{shell} exits or the host process receives an \gls{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.\\
-The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{terminal} in raw-mode and waits until the connections dies(it receives \texttt{EOF}) and then restores the \gls{terminal} to the default cooked state.
+This new design of the \texttt{goshd} server calls the external binary \texttt{goshh} from the server process and lets it handle the connection itself. The server then asks for some environment variables from the client. Then the server tries to figure out whether the client can authenticate himself via keys. If authentication with keys is a viable option, it performs the key authentication according to \ref{sec:DesignAuthViaKeys}. If it succeeds, it notifies the client of the authentication result. The host then spawns the user's \gls{shell} and forwards the traffic between the two.
+
+If key authentication does not succeed, the host performs the classical authentication with user-password-credentials which also ends in spawning a user \gls{shell} if successful.
+
+If the \gls{shell} exits or the host process receives an \gls{SIGINT}, it cleans up behind the exited \gls{shell} and exits as well.
+
+The client performs the transfer of the environment variables until it receives the termination packet. Upon arrival of said packet, it prepares for the forwarding of the traffic between the user and the server. It does so by setting the \gls{terminal} in raw-mode and waits until the connections dies (it receives \texttt{EOF}) and then restores the \gls{terminal} to the default cooked state.
 
 
 \chapter{Implementation}\label{chp:Implementation}
@@ -395,16 +412,20 @@ The server-side of the solution has to have a certificate, which has to be gener
 \begin{lstlisting}[caption={Generating a self-signed certificate and private key},label=lst:GenCertNKey]
 openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 \end{lstlisting}
-The files \texttt{key.pem} and \texttt{certificate.pem} can be found inside the \texttt{test} folder in the project's root folder.\\
+The files \texttt{key.pem} and \texttt{certificate.pem} can be found inside the \texttt{test} folder in the project's root folder.
+
 The current implementation is set to skip verification of insecure certificates. Handling such a case has been decided to be handled in future improvements.
 
 \section{Authentication via PAM}\label{sec:ImplAuthViaPAM}
-There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM}(refer to \ref{sec:DesignAuthViaPAM}). In earlier stages of the project, a wrapper from \cite{gopam} has been used. However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions(see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}).
+There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM} (refer to \ref{sec:DesignAuthViaPAM}). In earlier stages of the project, a wrapper from \cite{gopam} has been used. However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions (see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}).
 
 \section{Authentication via Keys}\label{sec:ImplAuthViaKeys}
-The authentication via keys has been implemented with \ref{sec:DesignAuthViaKeys} in mind but with some alterations.\\
-The first change was to store the public key in a plain text format, which was done out of convenience and can be changed in the future. Not storing the hashed public key doesn't pose any security threat, so fixing this deviation was deemed of low priority.\\
-The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory. This is a sub-optimal approach, as his requires users to store their public keys in the superuser's directory, which can lead to mistakes. This will be fixed in the future.\\
+The authentication via keys has been implemented with \ref{sec:DesignAuthViaKeys} in mind but with some alterations.
+
+The first change was to store the public key in a plain text format, which was done out of convenience and can be changed in the future. Not storing the hashed public key doesn't pose any security threat, so fixing this deviation was deemed of low priority.
+
+The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory. This is a sub-optimal approach, as his requires users to store their public keys in the superuser's directory, which can lead to mistakes. This will be fixed in the future.
+
 To test the application, a test user was created and given a key pair which was created as follows using \cite{openssl}:
 \setlistingBash
 \begin{lstlisting}[caption={Generating a key pair for the client},label=lst:GenClientKeyPair]
@@ -413,7 +434,7 @@ openssl rsa -in client.pem -out client.pub -pubout
 \end{lstlisting}
 
 \section{User Data Querying}\label{sec:ImplUserDataQuerying}
-Querying user data(see \ref{sec:DesignUserDataQuerying}) has been originally been implemented by using a private package that parsed the \texttt{passwd} file. In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines.
+Querying user data (see \ref{sec:DesignUserDataQuerying}) has been originally been implemented by using a private package that parsed the \texttt{passwd} file. In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines.
 
 \section{Login Accounting}\label{sec:ImplLoginAccounting}
 The current implementation either outsources the post-login actions described in \ref{sec:DesignLoginAccounting} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}. The implementation of this feature is not part of the current project.
@@ -455,7 +476,8 @@ For the project, this code has been altered to better fit the flow of the applic
 
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
-To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.\\
+To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.
+
 In theory, this should have enabled the program to use \gls{Go}'s standard library capabilities to handle connections. However, there were several problems with this approach:
 
 \subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
@@ -463,14 +485,16 @@ The \gls{Go} standard library does not support the classical \gls{C}-like forkin
 \begin{quote}
 Combination of fork and exec, careful to be thread safe.
 \end{quote}
-But since it uses \texttt{exec} as well, it is the same as calling arbitrary binaries/scripts with the \texttt{exec.Cmd} function.\\
-However: \gls{Go} has a feature called \gls{CGo}, which allows programs to call and interact with native \gls{C}-routines. This opens up the possibility of using \texttt{fork(2)}.
+But since it uses \texttt{exec} as well, it is the same as calling arbitrary binaries/scripts with the \texttt{exec.Cmd} function.
+
+However: \gls{Go} has a feature called \gls{CGo}, which allows programs to call and interact with native \gls{C}-routines. This opens up the possibility of using \cite{fork}.
 
 \subsubsection{Forking breaks Go objects}\label{sssec:ForkingBreaksGoObjects}
 Forking with the functionality of \gls{CGo} does not solve the problem either. The reason is that after forking there are two programs with a \texttt{net.Conn} object. This lead to both connection objects being corrupted and turning unusable. Therefore, it was necessary to abandon the clean solution of forking and instead creating a new executable that can handle new connections by its own.
 
 \subsubsection{Sharing Data with Child}\label{sssec:SharingDataWithChild}
-The question then was: How can a process instantiate a child process and hand over all resources to it necessary for handling the new connection?\\
+The question then was: How can a process instantiate a child process and hand over all resources to it necessary for handling the new connection?
+
 Since they are 2 separate processes now, they don't share any memory anymore. Hence the parent has to give the child the information about the connection via arguments. The most direct way to deal with this is to use \glspl{fd}, which can be passed as integer arguments to the child.
 
 \subsubsection{Go Connection Cannot Be Transferred}\label{sssec:GoConnectionCannotBeTransferred}
@@ -494,7 +518,8 @@ if err != nil {
 fd := file.Fd()
 \end{lstlisting}
 
-However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from, fails.\\
+However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from, fails.
+
 This had some implications for the project: The listener on the server could not be created with the high-level like:
 \setlistingGo
 \begin{lstlisting}[caption={\gls{Go}'s high level \gls{API} for listener},label=lst:ListenForConn]
@@ -511,20 +536,19 @@ for {
 }
 \end{lstlisting}
 
-Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{Unix} provides the necessary wrapper functions, which can be used instead.\\
+Instead the project had to rely on the low-level \gls{socket}. The \gls{x-package} \texttt{Unix} provides the necessary wrapper functions, which can be used instead.
+
 The obvious drawback: Having to rely on a \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
 
 
 \chapter{Results}\label{chp:Results}
-\notes{\item (Zusammenfassung der Resultate)}
+% (Zusammenfassung der Resultate)
 
 \chapter{Discussion And Prospects}\label{chp:DiscussionAndProspects}
-\notes{
-\item Bespricht die erzielten Ergebnisse bezüglich ihrer Erwartbarkeit, Aussagekraft und Relevanz
-\item Interpretation und Validierung der Resultate
-\item Rückblick auf Aufgabenstellung, erreicht bzw. nicht erreicht
-\item Legt dar, wie an die Resultate (konkret vom Industriepartner oder weiteren Forschungsarbeiten; allgemein) angeschlossen werden kann; legt dar, welche Chancen die Resultate bieten
-}
+% Bespricht die erzielten Ergebnisse bezüglich ihrer Erwartbarkeit, Aussagekraft und Relevanz
+% Interpretation und Validierung der Resultate
+% Rückblick auf Aufgabenstellung, erreicht bzw. nicht erreicht
+% Legt dar, wie an die Resultate (konkret vom Industriepartner oder weiteren Forschungsarbeiten; allgemein) angeschlossen werden kann; legt dar, welche Chancen die Resultate bieten
 
 \chapter{Index}\label{chp:Index}
 \bibliography{reference}\label{sec:Bibliography}
@@ -546,11 +570,10 @@ The obvious drawback: Having to rely on a \gls{x-package} which is subject to ch
 \appendix
 \chapter{Appendix}\label{chp:Appendix}
 \section{Project Management}\label{sec:ProjectManagement}
-\notes{
-\item Offizielle Aufgabenstellung, Projektauftrag
-\item (Zeitplan) 
-\item (Besprechungsprotokolle oder Journals)
-}
+% Offizielle Aufgabenstellung, Projektauftrag
+% (Zeitplan) 
+% (Besprechungsprotokolle oder Journals)
+
 \subsection{Official Statement of Tasks}\label{ssec:OfficialStatementOfTasks}
 \includepdf[pages=-]{tasks.pdf}
 \subsection{Project Plan}\label{ssec:ProjectPlan}
@@ -570,15 +593,13 @@ The meeting minutes have a disruption in style and execution beginning from the 
 \includepdf[pages=-]{minutes/11th_Meeting.pdf}
 
 \section{Others}\label{sec:Others}
-\notes{
-\item CD mit dem vollständigen Bericht als pdf-File inklusive Film- und Fotomaterial
-\item (Schaltpläne und Ablaufschemata)
-\item (Spezifikationen u. Datenblätter der verwendeten Messgeräte und/oder Komponenten)
-\item (Berechnungen, Messwerte, Simulationsresultate)
-\item (Stoffdaten)
-\item (Fehlerrechnungen mit Messunsicherheiten)
-\item (Grafische Darstellungen, Fotos)
-\item (Datenträger mit weiteren Daten(z. B. Software-Komponenten) inkl. Verzeichnis der auf diesem Datenträger abgelegten Dateien)
-\item (Softwarecode)
-}
+% CD mit dem vollständigen Bericht als pdf-File inklusive Film- und Fotomaterial
+% (Schaltpläne und Ablaufschemata)
+% (Spezifikationen u. Datenblätter der verwendeten Messgeräte und/oder Komponenten)
+% (Berechnungen, Messwerte, Simulationsresultate)
+% (Stoffdaten)
+% (Fehlerrechnungen mit Messunsicherheiten)
+% (Grafische Darstellungen, Fotos)
+% (Datenträger mit weiteren Daten(z. B. Software-Komponenten) inkl. Verzeichnis der auf diesem Datenträger abgelegten Dateien)
+% (Softwarecode)
 \end{document}
