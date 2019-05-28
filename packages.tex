@@ -2,10 +2,10 @@
 \RequirePackage{lscape}
 \usepackage{pgfgantt}
 \usepackage{xcolor}
-	\definecolor{lgray}{RGB}{250,250,250}
-	\definecolor{lgreen}{RGB}{63,127,95}
-	\definecolor{lred}{RGB}{127,0,85}
-	\definecolor{lblue}{RGB}{42,0,255}
+	\definecolor{colBg}{RGB}{243,243,243}
+	\definecolor{colComment}{RGB}{40,139,27}
+	\definecolor{colKeywd}{RGB}{48,31,217}
+	\definecolor{colStr}{RGB}{222,143,16}
 \usepackage{listings}
 	\lstdefinestyle{basestyle}{
 		basicstyle=\small\ttfamily,
@@ -26,11 +26,11 @@
 		showstringspaces=false,
 		breaklines=true,
 %		prebreak=\Righttorque
-		backgroundcolor=\color{lgray},
-		keywordstyle=\color{lred}\bfseries,
-		commentstyle=\color{lgreen}\ttfamily,
+		backgroundcolor=\color{colBg},
+		keywordstyle=\color{colKeywd}\bfseries,
+		commentstyle=\color{colComment}\ttfamily,
 %		morekeywords={printstr, printhexln},
-		stringstyle=\color{lblue},
+		stringstyle=\color{colStr},
 		xleftmargin = \fboxsep,
 		xrightmargin = -6pt,
 		showstringspaces=true,
@@ -108,7 +108,7 @@
 	}}
 \usepackage{xstring}
 	\newcommand{\inlist}[2]{
-		\IfSubStr{,#2,}{,\arabic{#1},}{\color{lgray!95!blue}}{\color{lgray}}
+		\IfSubStr{,#2,}{,\arabic{#1},}{\color{colBg!95!blue}}{\color{colBg}}
 	}
 \usepackage{lstlinebgrd}
 	\makeatletter
@@ -116,7 +116,7 @@
 	\ifx\lst@linebgrdcolor\empty\else
 		\rlap{%
 			\lst@basicstyle
-			\color{lgray}
+			\color{colBg}
 			\lst@linebgrdcolor{%
 				\kern-\dimexpr\lst@linebgrdsep\relax%
 				\lst@linebgrdcmd{\lst@linebgrdwidth}{\lst@linebgrdheight}{\lst@linebgrddepth }%
@@ -156,6 +156,7 @@
 \usepackage{array}
 \usepackage{natbib}
 	\bibliographystyle{agsm}
+% Fix old font commands when writing bibliography with bibtex
 \DeclareOldFontCommand{\rm}{\normalfont\rmfamily}{\mathrm}
 \DeclareOldFontCommand{\sf}{\normalfont\sffamily}{\mathsf}
 \DeclareOldFontCommand{\tt}{\normalfont\ttfamily}{\mathtt}
@@ -284,7 +285,7 @@
 	{\if@restonecol\onecolumn\else\clearpage\fi}
 \makeatother
 
-\usepackage[htt]{hyphenat} % line braks within \texttt{}
+\usepackage{hyphenat} % line breaks within \texttt{}
 \usepackage{varioref}
 \usepackage[backref = page]{hyperref}
 \usepackage[noabbrev,capitalise,nameinlink]{cleveref}

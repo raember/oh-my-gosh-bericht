@@ -4,7 +4,7 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>190</x>
+      <x>380</x>
       <y>100</y>
       <w>100</w>
       <h>30</h>
@@ -15,7 +15,7 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>230</x>
+      <x>420</x>
       <y>120</y>
       <w>30</w>
       <h>40</h>
@@ -26,12 +26,13 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>230</x>
+      <x>420</x>
       <y>140</y>
       <w>20</w>
       <h>850</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -64,25 +65,26 @@
       <w>20</w>
       <h>850</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>160</y>
-      <w>310</w>
+      <w>120</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
-Dial(protocol, address, port)</panel_attributes>
-    <additional_attributes>10.0;20.0;290.0;20.0</additional_attributes>
+Dial()</panel_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>670</x>
+      <x>630</x>
       <y>100</y>
       <w>100</w>
       <h>30</h>
@@ -93,7 +95,7 @@ Dial(protocol, address, port)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>710</x>
+      <x>670</x>
       <y>120</y>
       <w>30</w>
       <h>140</h>
@@ -104,12 +106,13 @@ Dial(protocol, address, port)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>710</x>
+      <x>670</x>
       <y>240</y>
       <w>20</w>
       <h>700</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -117,17 +120,17 @@ Dial(protocol, address, port)</panel_attributes>
     <coordinates>
       <x>540</x>
       <y>220</y>
-      <w>190</w>
+      <w>150</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;
 NewServer(conn)</panel_attributes>
-    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>860</x>
+      <x>810</x>
       <y>100</y>
       <w>100</w>
       <h>30</h>
@@ -138,7 +141,7 @@ NewServer(conn)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>900</x>
+      <x>850</x>
       <y>120</y>
       <w>30</w>
       <h>260</h>
@@ -149,126 +152,128 @@ NewServer(conn)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>900</x>
+      <x>850</x>
       <y>360</y>
       <w>20</w>
       <h>150</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>340</y>
-      <w>200</w>
+      <w>190</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
 Authenticate(callback)</panel_attributes>
-    <additional_attributes>10.0;20.0;180.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>190</y>
-      <w>310</w>
+      <w>120</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 conn</panel_attributes>
-    <additional_attributes>10.0;20.0;290.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;100.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>540</x>
       <y>250</y>
-      <w>190</w>
+      <w>150</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
 Serve()</panel_attributes>
-    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>290</y>
       <w>190</w>
       <h>60</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
-NewReadWriter(...)</panel_attributes>
+NewReadWriter(...)
+layer=0</panel_attributes>
     <additional_attributes>10.0;10.0;50.0;10.0;50.0;40.0;10.0;40.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>400</y>
-      <w>680</w>
+      <w>440</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 WriteString("user")</panel_attributes>
-    <additional_attributes>10.0;20.0;660.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;420.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>370</y>
-      <w>680</w>
+      <w>440</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-
 WriteString("Login: ")</panel_attributes>
-    <additional_attributes>10.0;20.0;660.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;420.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>460</y>
-      <w>680</w>
+      <w>440</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 WriteString("password")</panel_attributes>
-    <additional_attributes>10.0;20.0;660.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;420.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>430</y>
-      <w>680</w>
+      <w>440</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-
 WriteString("Password: ")</panel_attributes>
-    <additional_attributes>10.0;20.0;660.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;420.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>490</y>
-      <w>200</w>
+      <w>190</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 Transaction</panel_attributes>
-    <additional_attributes>10.0;20.0;180.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>960</x>
+      <x>920</x>
       <y>100</y>
       <w>100</w>
       <h>30</h>
@@ -279,7 +284,7 @@ Transaction</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1000</x>
+      <x>960</x>
       <y>120</y>
       <w>30</w>
       <h>440</h>
@@ -290,18 +295,19 @@ Transaction</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1000</x>
+      <x>960</x>
       <y>540</y>
       <w>20</w>
       <h>400</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>520</y>
       <w>300</w>
       <h>40</h>
@@ -313,7 +319,7 @@ NewHost</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>550</y>
       <w>300</w>
       <h>40</h>
@@ -325,67 +331,67 @@ Login(transaction)</panel_attributes>
   <element>
     <id>UMLFrame</id>
     <coordinates>
-      <x>130</x>
+      <x>350</x>
       <y>640</y>
-      <w>1280</w>
+      <w>990</w>
       <h>240</h>
     </coordinates>
-    <panel_attributes>session loop
-layer=-1</panel_attributes>
+    <panel_attributes>session
+layer=-2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>580</y>
-      <w>780</w>
+      <w>550</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-
 GetTermEnv()</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>610</y>
-      <w>780</w>
+      <w>550</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=.&gt;
 </panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>640</y>
-      <w>780</w>
+      <w>550</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-
 Out(data)</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>430</x>
       <y>670</y>
-      <w>780</w>
+      <w>550</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
 In(data)</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1130</x>
+      <x>1070</x>
       <y>100</y>
       <w>160</w>
       <h>30</h>
@@ -396,7 +402,7 @@ In(data)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1200</x>
+      <x>1140</x>
       <y>120</y>
       <w>30</w>
       <h>40</h>
@@ -407,42 +413,43 @@ In(data)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1200</x>
+      <x>1140</x>
       <y>140</y>
       <w>20</w>
       <h>850</h>
     </coordinates>
-    <panel_attributes/>
+    <panel_attributes>
+layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1010</x>
+      <x>970</x>
       <y>520</y>
-      <w>210</w>
+      <w>190</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
 ConnectRequestBroker</panel_attributes>
-    <additional_attributes>10.0;20.0;190.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1010</x>
+      <x>970</x>
       <y>700</y>
-      <w>210</w>
+      <w>190</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;
 Request(type, data)</panel_attributes>
-    <additional_attributes>10.0;20.0;190.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1320</x>
+      <x>1240</x>
       <y>100</y>
       <w>100</w>
       <h>30</h>
@@ -453,7 +460,7 @@ Request(type, data)</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1360</x>
+      <x>1280</x>
       <y>120</y>
       <w>30</w>
       <h>40</h>
@@ -464,112 +471,101 @@ Request(type, data)</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>1360</x>
+      <x>1280</x>
       <y>140</y>
       <w>20</w>
       <h>850</h>
     </coordinates>
-    <panel_attributes/>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1210</x>
-      <y>730</y>
-      <w>170</w>
-      <h>40</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;&gt;
-Execute(cmd)</panel_attributes>
-    <additional_attributes>10.0;20.0;150.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1210</x>
-      <y>770</y>
-      <w>170</w>
-      <h>30</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>10.0;10.0;150.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1010</x>
-      <y>800</y>
-      <w>210</w>
-      <h>30</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;.</panel_attributes>
-    <additional_attributes>10.0;10.0;190.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>240</x>
-      <y>820</y>
-      <w>780</w>
-      <h>40</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-
-Out(data)</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>240</x>
-      <y>850</y>
-      <w>780</w>
-      <h>40</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;&gt;&gt;
-In(data)</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLFrame</id>
-    <coordinates>
-      <x>90</x>
-      <y>890</y>
-      <w>1320</w>
-      <h>80</h>
-    </coordinates>
-    <panel_attributes>session breakdown
+    <panel_attributes>
 layer=-1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
+      <x>1150</x>
+      <y>730</y>
+      <w>150</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;&gt;
+Execute(cmd)</panel_attributes>
+    <additional_attributes>10.0;20.0;130.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1150</x>
+      <y>770</y>
+      <w>150</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;130.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>970</x>
+      <y>800</y>
+      <w>190</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;170.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
+      <y>820</y>
+      <w>550</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-
+Out(data)</panel_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
+      <y>850</y>
+      <w>550</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;&gt;&gt;
+In(data)</panel_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
       <y>890</y>
-      <w>780</w>
+      <w>550</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
 ^D/conn.Close()</panel_attributes>
-    <additional_attributes>10.0;20.0;760.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;530.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1010</x>
+      <x>970</x>
       <y>550</y>
-      <w>210</w>
+      <w>190</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;.
 pid</panel_attributes>
-    <additional_attributes>10.0;20.0;190.0;20.0</additional_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>720</x>
+      <x>680</x>
       <y>920</y>
       <w>300</w>
       <h>40</h>

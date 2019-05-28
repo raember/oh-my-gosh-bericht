@@ -298,6 +298,8 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 \section{Terminal Mode}\label{sec:DesignTerminalMode}
 The client expects to send all its input directly to the \gls{shell} without prior interpretation. To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}. This sends each key stroke to the server-side \gls{shell} as is. After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
+
+\newpage
 \section{Pseudoterminal}\label{sec:DesignPseudoterminal}
 \glspl{pty} are an \gls{IPC} mechanism that help solving the problem of how two remote programs can communicate as if they were directly connected via a \gls{terminal} (see figure \ref{fig:HowToOperateTtyOrientedProgramOverNetwork}).
 
@@ -331,7 +333,22 @@ With the \gls{pty} properly set up, a child bound to the \gls{pts} side will ass
 \label{fig:HowSSHUsesPty}
 \end{figure}
 
+
 \newpage
+\section{Privilege Separation}\label{sec:DesignPrivilegeSeparation}
+Allowing a user to log in as any user, the authenticating process has to have \texttt{root} rights. However: After performing the authentication procedure and after successfully finishing the latter, a \gls{shell} will be spawned for the user to interact with. This implies that without dropping the privilege of the process down to the appropriate privileges of the logged in user, the \gls{shell} would run with \texttt{root} rights, which is a privilege escalation and not permissible.
+
+\gls{Linux} provides \cite{setuid} to set the owning user of a process and therefore also changing it's permissions. Unless the user is \texttt{root}, the process' owner cannot be changed.
+
+In comparison: \gls{SSH} chains the authentication of a user between an unprivileged child process that forwards the information between the two processes (see figure \ref{fig:PrivilegeSeparationInSSH}) - thereby putting a privilege separation in place.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{priv}
+\caption{Privilege separation in SSH \citep{ProvosSSHPriv}}
+\label{fig:PrivilegeSeparationInSSH}
+\end{figure}
+
+
 \section{Flow of Action}\label{sec:DesignFlowOfAction}
 To create a client-server protocol for remote log in and interactive sessions, a clear cut architecture is mandatory. The flow of a typical use case should look like this:
 
@@ -473,6 +490,22 @@ func Open() (master *os.File, slave string, err error) {
 }
 \end{lstlisting}
 For the project, this code has been altered to better fit the flow of the application.
+
+
+\section{Service Hosting}\label{sec:ImplServiceHosting}
+The \texttt{goshd} program has to run on a server to accept incoming requests. For ease of use, the program should be able to be run as a \gls{daemon}. On \gls{Linux}, this can be achieved using the service manager \cite{systemd}, for which a unit file has been created, which is located inside the \texttt{init} directory of the project. After deployment of the software, the service can be controlled using \cite{systemd} commands:
+\setlistingBash
+\begin{lstlisting}[caption={\texttt{goshd} service control},label=lst:GoshdServiceCtl,deletekeywords={enable}]
+# Setup of goshd
+sudo systemctl enable goshd.service
+sudo systemctl start goshd.service
+sudo systemctl info goshd.service
+
+# Breakdown of goshd
+sudo systemctl stop goshd.service
+sudo systemctl disable goshd.service
+\end{lstlisting}
+
 
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
