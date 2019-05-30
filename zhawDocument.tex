@@ -67,12 +67,12 @@ It replaces the up until then widely used protocols like \cite{telnet}(see \ref{
 
 \gls{SSH} uses an own protocol to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.
 
-\gls{SSH}s' features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely login and use a \gls{terminal} on that machine.
+\gls{SSH}s' features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely log in and use a \gls{terminal} on that machine.
 It can also forward traffic on local ports to the remote host through the secure channel.
 This is also used by third party programs such as \cite{rsync}.
 
 When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}.
-Another feature is whitelisting of clients via their public keys, which stops intrusion attempts via hijacked user-password-credentials.
+Another feature is white listing of clients via their public keys, which stops intrusion attempts via hijacked user-password-credentials.
 
 After a secure connection could be established, there are multiple possibilities to use the opened channel.
 One is to forward the \gls{GUI} of a remote program to the client.
@@ -88,7 +88,7 @@ Go-Telnet\citep{gotelnet} is a \gls{TELNETS} supporting client-server-applicatio
 
 \subsection{Berkeley r-commands}\label{ssec:BerkeleyRCommands}
 The Berkley r-commands are a set of commands to do certain tasks on remote hosts.
-Those tasks are similar to their counterparts without a leading "\texttt{r}".
+Those tasks are similar to their counterparts without a leading ``\texttt{r}''.
 \begin{itemize}
 \item \cite{rlogin}
 
@@ -110,7 +110,7 @@ This command tells the user what users are currently logged in on the remote mac
 \texttt{rstat} displays file system information from remote hosts.
 \item \cite{ruptime}
 
-With this command, the user can see the uptime, number of logged in users and current work load of the remote machine.
+With this command, the user can see the \gls{uptime}, number of logged in users and current work load of the remote machine.
 \end{itemize}
 
 
@@ -263,10 +263,10 @@ The implementation of this feature also differs from the original design, as can
 \section{User Data Querying}\label{sec:DesignUserDataQuerying}
 To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required.
 This and other information can be found inside the \texttt{/etc/passwd} file.
-The file holds information about a users login-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory.
-To spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully login a user.
+The file holds information about a users \gls{login}-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory.
+To spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully log in a user.
 To query such data, \gls{Unix} offers \cite{getpw}, which doesn't just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist.
-This has been used in the implementaion phase (see \ref{sec:ImplUserDataQuerying}):
+This has been used in the implementation phase (see \ref{sec:ImplUserDataQuerying}):
 \setlistingC
 \begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
 #include <sys/types.h>
@@ -287,7 +287,7 @@ struct passwd *getpwuid(uid_t uid);
 \end{lstlisting}
 
 \section{Login Accounting}\label{sec:DesignLoginAccounting}
-When a user logs into a \gls{Unix} machine, a session and a timestamp gets created.
+When a user logs into a \gls{Unix} machine, a session and a time stamp gets created.
 
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage.
 The \texttt{utmpx} \gls{API} offers appropriate functions.
@@ -318,15 +318,15 @@ struct utmpx {
 };
 \end{lstlisting}
 
-On login, a record has to be written to the \texttt{utmp} file to indicate that the user logged in.
+On \gls{login}, a record has to be written to the \texttt{utmp} file to indicate that the user logged in.
 If there is already a record for the active \gls{terminal}, then the entry has to be updated, otherwise a new entry has to be appended.
 A call to \cite{pututxline} should suffice in performing these steps properly.
-The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} struct to \texttt{USER\_PROCESS} to mark a user login.
+The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} struct to \texttt{USER\_PROCESS} to mark a user \gls{login}.
 
-Similarly to the \texttt{utmp} update after login, the application has to report to the \texttt{utmpx} \gls{API} that the session ended.
-This procedure consists of almost the same actions as the one after login, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.
+Similarly to the \texttt{utmp} update after \gls{login}, the application has to report to the \texttt{utmpx} \gls{API} that the session ended.
+This procedure consists of almost the same actions as the one after logging in, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.
 
-A program can also query the \texttt{utmp} file with the according getters.
+A program can also query the \texttt{utmp} file with the according \texttt{get} methods.
 \setlistingC
 \begin{lstlisting}[caption={\texttt{utmpx} \gls{API} functions},label=lst:UtmpxApiFunctions]
 #include <utmp.h>
@@ -338,8 +338,10 @@ struct utmp *getutline(const struct utmp *ut);
 struct utmp *pututline(const struct utmp *ut);
 \end{lstlisting}
 
+Remarks for the implementation can be found at \ref{sec:ImplLoginAccounting}.
+
 \subsection{Login Accounting with PAM}\label{ssec:DesignLoginAccountingWithPAM}
-\gls{PAM} supports binding login accounting to its own session functions \cite{pam_open_session} and \cite{pam_close_session}:
+\gls{PAM} supports binding \gls{login} accounting to its own session functions \cite{pam_open_session} and \cite{pam_close_session}:
 \setlistingC
 \begin{lstlisting}[caption={\gls{PAM} session management},label=lst:PAMSessionManagement]
 #include <security/pam_appl.h>
@@ -353,6 +355,7 @@ The client expects to send all its input directly to the \gls{shell} without pri
 To achieve this, the client-side \gls{terminal} has to be set from the default \texttt{cooked}- into the \texttt{raw}-mode\citep[p.1309]{KerriskTLPI}.
 This sends each key stroke to the server-side \gls{shell} as is.
 After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
+A description of the procedure when implementing this feature can be found at \ref{sec:ImplTerminalMode}.
 
 
 \newpage
@@ -397,6 +400,8 @@ In case of \gls{SSH} and the objective of this thesis, the layout looks like in 
 \label{fig:HowSSHUsesPty}
 \end{figure}
 
+Notes regarding the implementation can be found at \ref{sec:ImplPseudoterminal}.
+
 
 \newpage
 \section{Privilege Separation}\label{sec:DesignPrivilegeSeparation}
@@ -415,6 +420,8 @@ In comparison: \gls{SSH} chains the authentication of a user between an unprivil
 \label{fig:PrivilegeSeparationInSSH}
 \end{figure}
 
+Remarks for the implementation are located at \ref{sec:Problems}.
+
 
 \section{Flow of Action}\label{sec:DesignFlowOfAction}
 To create a client-server protocol for remote log in and interactive sessions, a clear cut architecture is mandatory.
@@ -423,7 +430,7 @@ The flow of a typical use case should look like this:
 \begin{enumerate}
 \item Server listens for incoming connection.
 \item Client dials server.
-\item Server spawns the users login \gls{shell} and forwards all traffic between \gls{shell} and Client.
+\item Server spawns the users \gls{login} \gls{shell} and forwards all traffic between \gls{shell} and Client.
 \item Client uses \gls{shell} on remote machine.
 \item Client terminates session.
 \item Host terminates.
@@ -433,8 +440,8 @@ However, there are multiple security concerns to be satiated:
 
 \begin{enumerate}
 \item The Client must authenticate itself for a user of the remote system with the appropriate credentials.
-\item The Server has to drop privilege after a successful login to prevent privilege escalation.
-\item The Server has to spawn the login \gls{shell} of the logged in user with the appropriate rights.
+\item The Server has to drop privilege after a successful \gls{login} to prevent privilege escalation.
+\item The Server has to spawn the \gls{login} \gls{shell} of the logged in user with the appropriate rights.
 \end{enumerate}
 
 Furthermore, the current design does not allow for multiple sessions to be run parallel.
@@ -450,7 +457,7 @@ This lead to  the following general flow of actions:
 \item Host asks Client to authenticate himself.
 \item Client authenticates himself.
 \item Host drops privilege to logged in user.
-\item Host spawns the users login \gls{shell} with the same credentials and forwards all traffic between \gls{shell} and Client.
+\item Host spawns the users \gls{login} \gls{shell} with the same credentials and forwards all traffic between \gls{shell} and Client.
 \item Client uses \gls{shell} on remote machine.
 \item Client terminates session.
 \item Host terminates.
@@ -517,7 +524,7 @@ Handling such a case has been decided to be handled in future improvements.
 \section{Authentication via PAM}\label{sec:ImplAuthViaPAM}
 There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM} (refer to \ref{sec:DesignAuthViaPAM}).
 In earlier stages of the project, a wrapper from \cite{gopam} has been used.
-However, it was deemed more sensible to rely on \cite{login}, as this already covers login-accounting and other post-login actions (see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}).
+However, it was deemed more sensible to rely on \cite{login}, as this already covers \gls{login}-accounting and other post-\gls{login} actions (see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}).
 
 \section{Authentication via Keys}\label{sec:ImplAuthViaKeys}
 The authentication via keys has been implemented with \ref{sec:DesignAuthViaKeys} in mind but with some alterations.
@@ -526,12 +533,12 @@ The first change was to store the public key in a plain text format, which was d
 Not storing the hashed public key doesn't pose any security threat, so fixing this deviation was deemed of low priority.
 
 The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory.
-This is a sub-optimal approach, as his requires users to store their public keys in the superuser's directory, which can lead to mistakes.
+This is a sub-optimal approach, as his requires users to store their public keys in the super user's directory, which can lead to mistakes.
 This will be fixed in the future.
 
 To test the application, a test user was created and given a key pair which was created as follows using \cite{openssl}:
 \setlistingBash
-\begin{lstlisting}[caption={Generating a key pair for the client},label=lst:GenClientKeyPair]
+\begin{lstlisting}[caption={Generating a key pair for the client},label=lst:GenClientKeyPair,deletekeywords={in}]
 openssl genpkey -out client.pem -algorithm rsa -pkeyopt rsa_keygen_bits:2048
 openssl rsa -in client.pem -out client.pub -pubout
 \end{lstlisting}
@@ -541,13 +548,15 @@ Querying user data (see \ref{sec:DesignUserDataQuerying}) has been originally be
 In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines.
 
 \section{Login Accounting}\label{sec:ImplLoginAccounting}
-The current implementation either outsources the post-login actions described in \ref{sec:DesignLoginAccounting} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}.
+The current implementation either outsources the post-\gls{login} actions described in \ref{sec:DesignLoginAccounting} to \cite{login}(see \ref{sec:ImplAuthViaPAM}) or omits them completely, as is the case in \ref{sec:ImplAuthViaKeys}.
 The implementation of this feature is not part of the current project.
 
 \section{Terminal Mode}\label{sec:ImplTerminalMode}
-Setting the \gls{terminal} mode in \gls{Go} can be achieved with the functionality of the x-package \linebreak\texttt{golang.org/x/crypto/ssh/terminal}:
+Setting the \gls{terminal} mode as described in \ref{sec:DesignTerminalMode} in \gls{Go} can be achieved with the functionality of the x-package ``\texttt{golang.org/x/crypto/ssh/terminal}'':
 \setlistingGo
 \begin{lstlisting}[caption={Setting the \gls{terminal} mode in \gls{Go}},label=lst:GoTermMode]
+import "golang.org/x/crypto/ssh/terminal"
+//...
 oldState, err := terminal.MakeRaw(0)
 if err != nil {
 	panic(err)
@@ -600,18 +609,18 @@ sudo systemctl disable goshd.service
 
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
-To handle new established connections, it was deemed important to \texttt{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.
+To handle new established connections, it was deemed important to \cite{fork} the process, as this duplicated the current process' memory and returns the \gls{PID}: 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.
 
 In theory, this should have enabled the program to use \gls{Go}'s standard library capabilities to handle connections.
-However, there were several problems with this approach:
+However, there were several problems with this approach, which break the design discussed in \ref{sec:DesignPrivilegeSeparation}:
 
 \subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
 The \gls{Go} standard library does not support the classical \gls{C}-like forking.
 It only has a \texttt{syscall.\linebreak{}ForkExec} method, which is documented as:
 \begin{quote}
-Combination of fork and exec, careful to be thread safe.
+Combination of \cite{fork} and \cite{exec}, careful to be thread safe.
 \end{quote}
-But since it uses \texttt{exec} as well, it is the same as calling arbitrary binaries/scripts with the \texttt{exec.Cmd} function.
+But since it uses \cite{exec} as well, it is the same as calling arbitrary binaries/scripts with the \texttt{exec.Cmd} function.
 
 However: \gls{Go} has a feature called \gls{CGo}, which allows programs to call and interact with native \gls{C}-routines.
 This opens up the possibility of using \cite{fork}.
