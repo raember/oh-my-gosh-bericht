@@ -67,7 +67,7 @@ It replaces the up until then widely used protocols like \cite{telnet}(see \ref{
 
 \gls{SSH} uses an own protocol to secure the communication channel between two peers and has earned itself a spot on the low end of the \gls{port} table: It occupies \gls{port} 22.
 
-\gls{SSH}s' features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely log in and use a \gls{terminal} on that machine.
+\gls{SSH}'s features can be used very flexibly: After it builds up a secure connection between a client and a server, it can be used to remotely log in and use a \gls{terminal} on that machine.
 It can also forward traffic on local ports to the remote host through the secure channel.
 This is also used by third party programs such as \cite{rsync}.
 
@@ -79,10 +79,15 @@ One is to forward the \gls{GUI} of a remote program to the client.
 Another one is to use this channel to tunnel more connections through it: For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host.
 This can obscure and secure this traffic between the host and the server.
 
+The envisioned solution will simplify all the overloaded features of \gls{SSH} and provide a light alternative.
+
 \subsection{Telnet}\label{ssec:Telnet}
 Telnet\citep{rfc15,rfc854} is an old (1969) and deprecated communication protocol which doesn't feature any security.
 However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.
 Telnet still has 23 as its very own \gls{port} assigned to it.
+
+In comparison to the envisioned project, the official Telnet solution does not provide a secure channel, which sets those two apart.
+
 \subsubsection{Go-Telnet}
 Go-Telnet\citep{gotelnet} is a \gls{TELNETS} supporting client-server-application which has been implemented in \gls{Go}.
 
@@ -93,25 +98,33 @@ Those tasks are similar to their counterparts without a leading ``\texttt{r}''.
 \item \cite{rlogin}
 
 This command connects to the host and performs a \cite{login} command, which includes authentication and if successful, spawning a user \gls{shell}.
+
 \item \cite{rsh}
 
 \texttt{rsh} spawns a \gls{shell} without the log in process.
+
 \item \cite{rexec}
 
 With this command, the user can log in to a remote machine and execute one command.
+
 \item \cite{rcp}
 
 Using this command gives the user the ability to copy from and to a remote host.
+
 \item \cite{rwho}
 
 This command tells the user what users are currently logged in on the remote machine.
+
 \item \cite{rstat}
 
 \texttt{rstat} displays file system information from remote hosts.
+
 \item \cite{ruptime}
 
 With this command, the user can see the \gls{uptime}, number of logged in users and current work load of the remote machine.
 \end{itemize}
+
+The envisioned solution will provide a secure channel to operate on a remote server, which the r-commands (specifically the \cite{rlogin} command) do not provide.
 
 
 \section{Task}\label{sec:Task}
@@ -368,12 +381,12 @@ Therefore the \gls{fd} it is connected to should behave like a real \gls{termina
 This is where \glspl{pty} come into play.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalProblem}
-\caption{How to operate a \gls{tty}-oriented program over a network?\citep[p.1376]{KerriskTLPI}}
+\caption{How to operate a \gls{tty}-oriented program over a network? \citep[p.1376]{KerriskTLPI}}
 \label{fig:HowToOperateTtyOrientedProgramOverNetwork}
 \end{figure}
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{Pseudoterminal}
-\caption{Two programs communicating via a \gls{pty}\citep[p.1377]{KerriskTLPI}}
+\caption{Two programs communicating via a \gls{pty} \citep[p.1377]{KerriskTLPI}}
 \label{fig:TwoProgramsCommunicatingViaAPty}
 \end{figure}
 To do this, two files are created: The \gls{ptm} and the corresponding \gls{pts}(see figure \ref{fig:TwoProgramsCommunicatingViaAPty}).
@@ -396,7 +409,7 @@ This mechanism is key to running a \gls{shell} and forwarding all traffic betwee
 In case of \gls{SSH} and the objective of this thesis, the layout looks like in figure \ref{fig:HowSSHUsesPty}.
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{PseudoterminalSSH}
-\caption{How \texttt{ssh} uses a \gls{pty}\citep[p.1378]{KerriskTLPI}}
+\caption{How \texttt{ssh} uses a \gls{pty} \citep[p.1378]{KerriskTLPI}}
 \label{fig:HowSSHUsesPty}
 \end{figure}
 
@@ -472,8 +485,9 @@ An earlier draft of the flow of actions was designed as a sequence diagram and c
 \label{fig:SeqDiaOriginal}
 \end{figure}
 
-This design used a \gls{Request Broker}, which would put another master-slave-relationship between a \gls{shell} and the \gls{Request Broker}.
-This would have been an over-complication of the use of a \gls{shell}, which, if set correctly, already runs only with the rights of the corresponding user and its groups.
+This design used a \gls{Request Broker}, which would limit the damage a compromised shell could do.
+
+After a series of developments, it was decided to let go of this concept due to changing of the overall structure, which would have lead to an overhead in time invested to construct this model.
 
 \subsection{New Design}\label{ssec:NewDesign}
 The new and current design of the architecture can be seen in figure \ref{fig:SeqDiaCurrent}.
@@ -588,6 +602,28 @@ func Open() (master *os.File, slave string, err error) {
 \end{lstlisting}
 For the project, this code has been altered to better fit the flow of the application.
 
+\subsection{Performance}\label{ssec:Performance}
+The \gls{pty} is an interface that needs data to be forwarded to and received from.
+This holds true for both sides (\gls{ptm} and the \gls{pts}) and therefore needs a mechanism to transfer said data.
+On the slave side, the \gls{shell} itself already seamlessly communicates with the device via its standard pipes.
+A similar concept is applied for the client and its connection to the server, where the application communicates via the connection with the server.
+There, the client uses a \gls{Go}-routine to asynchronously forward the standard input of the program to the connection.
+
+The master side has to transfer the input from the remote client to the \gls{ptm} and the output from the latter to the former as well.
+For this, the server uses two \gls{Go}-routines that asynchronously forward the data from each stream to the other and waits until the shell process terminates.
+
+Both these transfers are performed using \gls{Go}'s \texttt{WriteTo} method:
+\setlistingGo
+\begin{lstlisting}[caption={\texttt{WriteTo} method of \gls{Go}},label=lst:GoWriteTo]
+// WriteTo implements io.WriterTo.
+// This may make multiple calls to the Read method of the underlying Reader.
+// If the underlying reader supports the WriteTo method,
+// this calls the underlying WriteTo without buffering.
+func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
+\end{lstlisting}
+
+This mechanism performed well enough for the project, as it didn't take up too much resources and could be conveniently parallelized.
+
 
 \section{Service Hosting}\label{sec:ImplServiceHosting}
 The \texttt{goshd} program has to run on a server to accept incoming requests.
@@ -685,12 +721,148 @@ The obvious drawback: Having to rely on a \gls{x-package} which is subject to ch
 
 \chapter{Results}\label{chp:Results}
 % (Zusammenfassung der Resultate)
+The project provides 3 applications:
+\begin{itemize}
+\item \texttt{gosh} is the application for the client side use case.
+It takes the following arguments:
+\begin{itemize}
+\item \texttt{--help}: Displays the help text.
+\item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \textit{string}: An optional address with optional credentials (defaults to \texttt{localhost}).
+\end{itemize}
+\item \texttt{goshd} is the daemon on the server side that awaits incoming requests.
+It takes the following arguments:
+\begin{itemize}
+\item \texttt{--help}: Displays the help text.
+\item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \texttt{--cert}: Sets the path of the server certificate (defaults to ``\texttt{/etc/gosh/certifi\linebreak{}cate.pem}'').
+\item \texttt{--key}: Sets the path of the server key file (defaults to ``\texttt{/etc/gosh/key.pem}'').
+\end{itemize}
+\item \texttt{goshh} is a host that handles a new connection.
+This binary is only executed by the server and takes the following arguments:
+\begin{itemize}
+\item \texttt{--help}: Displays the help text.
+\item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \texttt{--cert}: Sets the path of the server certificate (defaults to ``\texttt{/etc/gosh/certifi\linebreak{}cate.pem}'').
+\item \texttt{--key}: Sets the path of the server key file (defaults to ``\texttt{/etc/gosh/key.pem}'').
+\item \texttt{--remote}: Sets the address of the peer (defaults to ``\texttt{localhost:2222}'').
+\item \texttt{--fd}: Provides the \gls{fd} of the connection the host has to handle.
+\end{itemize}
+\end{itemize}
+
+To configure the applications, the client side has a configuration file called \texttt{gosh\_config.toml}.
+The server's configuration file is called \texttt{goshd\_config.toml} respectively, where both \texttt{goshd} and \texttt{goshh} refer to the same file.
+In it, the user can specify the following parameters and a few more:
+\begin{itemize}
+\item The default port to communicate over.
+\item The default log level.
+\item The location of the authorized keys.
+\item The maximum amount of allowed sessions (server-side only).
+\end{itemize}
+
+The project allows a user to connect to a server and enter an interactive session with a remote user's \gls{login} \gls{shell} (see \ref{sec:ImplTerminalMode}, \ref{sec:ImplAuthViaPAM}, \ref{sec:ImplAuthViaKeys}, \ref{sec:ImplPseudoterminal} and \ref{sec:ImplLoginAccounting}).
+On the server side an appropriate privilege separation is performed upon user \gls{login} (see \ref{sec:DesignPrivilegeSeparation} and \ref{sec:Problems}).
+The communication is secured in the beginning of the transaction using \gls{TLS} (see \ref{sec:ImplSecureConnection}).
+
+To test the applications, the user can execute the binaries from within the root folder of the project on both the client and the server (they can be the same machine, if so desired).
+To do this, the user can make use of the \gls{CLI} flags described above to redirect the dependencies to the test files in the project:
+\setlistingBash
+\begin{lstlisting}[caption={Running the applications for test purposes},label=lst:RunProject]
+# Setup environment: Create test user, its home directory and the login shell.
+./scripts/setup.sh
+
+# Start the server
+sudo goshd --conf configs --auth test --cert test/certificate.pem --key test/key.pem
+
+# Start the client
+gosh --conf configs --auth test
+# Or
+gosh --conf configs --auth test 192.168.0.100
+# Or
+gosh --conf configs --auth test test@localhost
+\end{lstlisting}
+
+To change the log level, giving the application the environment variable \texttt{LOG\_LEVEL} set to the desired log level (i.e. ``trace'', ``debug'', etc.) should suffice.
 
 \chapter{Discussion And Prospects}\label{chp:DiscussionAndProspects}
 % Bespricht die erzielten Ergebnisse bezüglich ihrer Erwartbarkeit, Aussagekraft und Relevanz
 % Interpretation und Validierung der Resultate
 % Rückblick auf Aufgabenstellung, erreicht bzw. nicht erreicht
 % Legt dar, wie an die Resultate (konkret vom Industriepartner oder weiteren Forschungsarbeiten; allgemein) angeschlossen werden kann; legt dar, welche Chancen die Resultate bieten
+As described in \ref{chp:Results}, the developed solution is capable of providing a \gls{TLS} secured channel to an interactive session of a remote user's \gls{shell}, of which the privilege has been dropped to the appropriate level for said user.
+It can be said that with this, the main goal of this thesis could be achieved.
+In the following list, an overview of the solutions to the official tasks are given and explained:
+\begin{itemize}
+\item \textbf{Design and implement a client-server protocol that can manage interactive sessions}
+
+This has been completed in \ref{chp:Design} and \ref{chp:Implementation} respectively.
+
+\item \textbf{Design and implement a privilege-separation architecture on the server side that allows safe dropping of privileges once a client establishes a connection}
+
+The design has been discussed in \ref{sec:DesignPrivilegeSeparation} and the implementation and problems encountered displayed in \ref{sec:Problems} respectively.
+Despite the encountered problems, a privilege separation was still realized.
+\end{itemize}
+
+As described in \ref{sec:Task}, the following tasks are required for a passing grade:
+
+\begin{itemize}
+\item \textbf{An introduction to the problem and why the envisaged solution will solve it}
+
+This has been discussed in \ref{chp:Introduction}.
+
+\item \textbf{A survey of related work in the area}
+
+Related works are listed and discussed in \ref{sec:InitialPosition} as well (specifically in \ref{ssec:OpenSSH}, \ref{ssec:Telnet} and \ref{ssec:BerkeleyRCommands}).
+
+\item \textbf{A detailed design of the solution}
+
+The entire design can be found at \ref{chp:Design}.
+
+\item \textbf{An evaluation of the performance of the implemented solution}
+
+An explanation to this task can be found at \ref{ssec:Performance}.
+
+\item \textbf{A privilege-separation architecture}
+
+This is the same as the first task and can be considered solved as of \ref{sec:DesignPrivilegeSeparation} and \ref{sec:Problems}.
+\end{itemize}
+
+In the following lists, there are additional tasks described in \ref{sec:Task}:
+
+\begin{itemize}
+\item \textbf{A comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better}
+
+A small comparison to the surveyed solutions can be found at \ref{ssec:OpenSSH}, \ref{ssec:Telnet} and \ref{ssec:BerkeleyRCommands}.
+
+\item \textbf{A detailed analysis of the security of the solution, including
+possible attacks and defenses}
+
+This task will be cleared in this chapter.
+
+\item \textbf{Use of TLS as the transport layer}
+
+This topic is also considered solved as of \ref{sec:DesignSecureConnection} and \ref{sec:ImplSecureConnection}.
+
+\item \textbf{A proof-of-concept client that can handle interactive sessions}
+
+A usable client has been developed and can be used after compilation of the source code.
+An overview of the developed applications can be found in \ref{chp:Results}.
+
+\item \textbf{A proof-of-concept client that works as a transport for rsync}
+
+This is a task that has not been solved in this thesis but its addition is discussed later in this chapter.
+\end{itemize}
+
+\section{Security}\label{sec:Security}
+\subsection{Secure Connection}\label{sec:SecSecureConnection}
+\subsection{Authentication}\label{sec:SecAuthentication}
+\subsection{Login}\label{sec:SecLogin}
+
+\section{Prospects}\label{sec:Prospects}
+
 
 \chapter{Index}\label{chp:Index}
 \bibliography{reference}\label{sec:Bibliography}
@@ -699,8 +871,8 @@ The obvious drawback: Having to rely on a \gls{x-package} which is subject to ch
 \newpage
 \listoffigures\label{sec:ListOfFigures}
 \newpage
-\listoftables\label{sec:ListOfTables}
-\newpage
+%\listoftables\label{sec:ListOfTables}
+%\newpage
 \lstlistoflistings\label{sec:ListOfListings}
 \newpage
 \printglossary[title=SymbolGlossary,type=symbols]\label{sec:SymbolGlossary}
