@@ -8,18 +8,28 @@
 %%	¦xelatex
 %%	
 
-\RequirePackage[l2tabu,orthodox]{nag}
-\documentclass[10pt,a4paper,titlepage,twoside,german]{zhawreprt}
+%\RequirePackage[l2tabu,orthodox]{nag}
+\documentclass[10pt,a4paper,landscape]{article}
+\usepackage[english]{babel}
+\usepackage{lscape}
+\usepackage{graphicx}
+\usepackage[landscape,left=0.8cm,right=0.8cm,top=3cm,bottom=3cm]{geometry}
 
-\include{packages}
-\if false
-\include{glossaryentries}
-\fi
+%\documentclass[a4paper,10pt]{article}
+%
+%\usepackage{lscape}
+%\usepackage[landscape]{geometry}
+\usepackage{pgfgantt}
+\usepackage{xcolor}
 
-\include{zhawSetup}
+%\include{packages}
+%\if false
+%\include{glossaryentries}
+%\fi
+%
+%\include{zhawSetup}
 
 \begin{document}
-\begin{landscape}
 %\subsection{Gantt-Diagram}
 %\label{sec:GanttDiag}
 \thispagestyle{empty}
@@ -99,7 +109,7 @@ y unit chart = 0.8cm,
 y unit title = 0.9cm,
 vgrid = {*6{color = SubBack1, dotted, thin},*1{color = MainBack1, dashed, very thin}},
 hgrid style/.style = {color = MainBack1, dotted, thick},
-today = 2.5.2019,
+today = 3.6.2019,
 today offset=0.5,
 today label = Today,
 today label node/.append style = {anchor = north west},
@@ -141,24 +151,22 @@ link bulge = 1.2,
 		{25.3.2019}{14.4.2019}\\
 	\ganttmilestone[progress=none,name=ProtoDeadline]{Deadline of the Prototype}{14.4.2019}\\[grid]
 	
-	\ganttbar[progress=50,name=TestNAnalysis]%
+	\ganttbar[progress=100,name=TestNAnalysis]%
 		{Testing and Analysis}%
 		{15.4.2019}{5.5.2019}\\
-	\ganttbar[progress=50,name=Rework]%
+	\ganttbar[progress=100,name=Rework]%
 		{Rework of Protocol}%
 		{22.4.2019}{12.5.2019}\\
-	\ganttbar[progress=20,name=Manual]%
+	\ganttbar[progress=100,name=Manual]%
 		{Manual of Use}%
 		{6.5.2019}{12.5.2019}\\
 	\ganttmilestone[progress=none,name=ProofOfConDeadline]{Deadline of Proof-of-concept}{12.5.2019}\\[grid]
 	
-	\ganttbar[progress=30,name=Writing]%
+	\ganttbar[progress=80,name=Writing]%
 		{Writing}%
 		{13.5.2019}{7.6.2019}\\
 	\ganttmilestone[progress=none,name=ProtoDeadline]{Deadline of the Prototype}{7.6.2019}
 %	\ganttlinkedbar[link type=f-f,link label={MUAHAHA}]{Foobar 3}{16.4.2019}{29.5.2019}\\
 %	\ganttmilestone[progress=none,name=Foo]{Milestone Test}{28.5.2019}
 \end{ganttchart}
-
-\end{landscape}
 \end{document}

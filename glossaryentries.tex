@@ -161,14 +161,19 @@ firstplural={Operating Systems(OSes)}
 {The slave of a \gls{pty} \citep{pts}.}
 
 \FullGlossaryEntry{SIGINT}{main}%
-{SIGINT}{SIGINTs}%
+{\texttt{SIGINT}}{\texttt{SIGINT}s}%
 {interrupt signal}{interrupt signals}%
 {A signal supported by \gls{Unix} based \glspl{OS} which signals to a process to interrupt it's work.}
+
+\FullGlossaryEntry{SIGWINCH}{main}%
+{\texttt{SIGWINCH}}{\texttt{SIGWINCH}s}%
+{window change signal}{window change signals}%
+{A signal supported by \gls{Unix} based \glspl{OS} which signals to a process that the terminal window it is running in has changed size.}
 
 \FullGlossaryEntry{SSH}{main}%
 {SSH}{}%
 {Secure Shell}{}%
-{An client-server-application that allows remote login and interaction with a \gls{shell}. See \ref{ssec:OpenSSH}.}
+{An client-server-application that allows remote login and interaction with a \gls{shell}. See \ref{sec:OpenSSH}.}
 
 \FullGlossaryEntry{PAM}{main}%
 {PAM}{PAMs}%
@@ -195,6 +200,11 @@ firstplural={Operating Systems(OSes)}
 {Group ID}{Group IDs}%
 {The unique identifier of a group represented as an integer.}
 
+\FullGlossaryEntry{SID}{main}%
+{SID}{SIDs}%
+{Session ID}{Session IDs}%
+{The unique identifier of a session represented as an integer.}
+
 \FullGlossaryEntry{IPC}{main}%
 {IPC}{}%
 {Inter-Process-Communication}{}%
@@ -219,6 +229,21 @@ firstplural={Operating Systems(OSes)}
 {TELNETS}{}%
 {Telnet Secure}{}%
 {Telnet with \gls{SSL} encryption.}
+
+\FullGlossaryEntry{WSL}{main}%
+{WSL}{}%
+{Windows Subsystem for Linux}{}%
+{A subsystem provided by Windows that is able to run headless \gls{Linux} distributions.}
+
+\FullGlossaryEntry{NIS}{main}%
+{NIS}{}%
+{Network Information Service}{}%
+{A service for distributing configurations like user information among a network.}
+
+\FullGlossaryEntry{LDAP}{main}%
+{LDAP}{}%
+{Lightweight Directory Access Protocol}{}%
+{A protocol for querying and managing information of distributed directory information services.}
 
 
 % Symbols
