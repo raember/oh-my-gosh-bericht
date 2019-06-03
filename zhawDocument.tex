@@ -49,7 +49,7 @@ The solution relies on a number of \gls{Unix} specific technologies like \glspl{
 The \gls{SSH} protocol \citep{rfc253,rfc6668,rfc8268,rfc8308,rfc8332} is a system that allows a user to log in on a remote machine and perform tasks on that remote machine via a \gls{CLI}.
 \gls{SSH} is widely known and used in everyday tasks.
 However: It is now over twelve years old in its current form.
-One of the problems with \gls{SSH} is its complexity, both in the initial phase when key material is exchanged, but also later, for example because the server must always decide whether to return a character that has been sent to it or not (echo).
+One of the problems with \gls{SSH} is its complexity, both in the initial phase when key material is exchanged, but also later, for example because the server-side has to solve whether to return a character that has been sent to it or not (echo).
 
 The goal of this work is a radically simplified protocol, which in its functions is similar to \gls{SSH} (N.B. the similarity concerns the functions, not necessarily the protocol details).
 I develop the protocol, as well as a client and a server - all in \gls{Go}.
@@ -256,79 +256,11 @@ After this, the two start an encrypted channel by for example using the \gls{Dif
 After this, every message can be transferred between client and server in an encrypted way.
 
 \section{Authentication via Password}\label{sec:DesignAuthViaPw}
-For authentication of users on Linux systems, \gls{PAM} exists.
+To let a user log in on the system, the user's authenticity has to be proven.
+To achieve that, \gls{Linux} provides \gls{PAM}.
 It provides a clean separation between a program and the sensitive part of the authentication.
-\gls{PAM} communicates with an application using a transaction structure.
-This structure represents a conversation with \gls{PAM}.
-Using this transaction, an application can do various actions regarding account management, authentication or session management.
-To initialize such a transaction, an application has to call the \cite{pam_start} function.
-
-\setlistingC
-\begin{lstlisting}[caption={Initializing a \gls{PAM} conversation},label=lst:InitPAMConversation]
-#include <security/pam_appl.h>
-
-struct pam_message {
-    int msg_style;
-    const char *msg;
-};
-
-struct pam_response {
-    char *resp;
-    int resp_retcode;
-};
-
-struct pam_conv {
-    int (*conv)(int num_msg, const struct pam_message **msg,
-                struct pam_response **resp, void *appdata_ptr);
-    void *appdata_ptr;
-};
-int pam_start(const char *service_name, const char *user, const struct pam_conv *pam_conversation, pam_handle_t **pamh);
-\end{lstlisting}
-
-Similarly, the created conversation has to be terminated with \cite{pam_end}:
-
-\setlistingC
-\begin{lstlisting}[caption={Terminating a \gls{PAM} conversation},label=lst:TermPAMConversation]
-#include <security/pam_appl.h>
-
-int pam_end(pam_handle_t *pamh, int pam_status);
-\end{lstlisting}
-
-After creating a conversation, the application can prepare the transaction with \cite{pam_set_item} and \cite{pam_get_item}.
-Using those function, fields like \texttt{PAM\_RUSER} and \texttt{PAM\_RHOST}, which together (\texttt{PAM\_RUSER@PAM\_RHOST}) represent the requesting user (remote or local).
-If in any of the prior or later steps any errors occur, the corresponding error message can be received with \cite{pam_strerror}.
-
-\setlistingC
-\begin{lstlisting}[caption={\gls{PAM} functions},label=lst:PAMFunctions]
-#include <security/pam_appl.h>
-
-int pam_get_item(const pam_handle_t *pamh, int item_type, const void **item);
-int pam_set_item(pam_handle_t *pamh, int item_type, const void *item);
-const char *pam_strerror(pam_handle_t *pamh, int errnum);
-\end{lstlisting}
-
-Now that the transaction has been appropriately prepared, the application can request to authenticate a user via \cite{pam_authenticate}:
-
-\setlistingC
-\begin{lstlisting}[caption={\gls{PAM} authentication},label=lst:PAMAuthentication]
-#include <security/pam_appl.h>
-
-int pam_authenticate(pam_handle_t *pamh, int flags);
-\end{lstlisting}
-
-Now \gls{PAM} uses the \texttt{pam\_conv} struct given in \cite{pam_start} that points to a function to interactively ask the application to authenticate the user.
-The application can then ask the user for the user name if not provided already and the password.
-After successful authentication, the function returns \texttt{PAM\_SUCCESS} and the application should call \cite{pam_setcred} to establish and maintain the credentials of the logged in user.
-
-\setlistingC
-\begin{lstlisting}[caption={\gls{PAM} credential setting},label=lst:PAMCredSet]
-#include <security/pam_appl.h>
-
-int pam_setcred(pam_handle_t *pamh, int flags);
-\end{lstlisting}
-
-Now the application can do other \gls{PAM} related actions like session management (see \ref{ssec:DesignLoginAccountingWithPAM}).
-To finish, the application terminates the conversation properly and all associated memory gets invalidated.
+How the server solves this situation is up to the implementation.
+It is also possible to rely on the \cite{login} command, which also uses \gls{PAM} in the background.
 
 \section{User Data Querying}\label{sec:DesignUserDataQuerying}
 To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required.
@@ -445,12 +377,6 @@ int pam_open_session(pam_handle_t *pamh, int flags);
 int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
-
-\newpage
-
-
-
-\newpage
 \section{Privilege Separation}\label{sec:DesignPrivilegeSeparation}
 Allowing a user to log in as any user, the authenticating process has to have \texttt{root} rights.
 However: After performing the authentication procedure and after successfully finishing the latter, a \gls{shell} will be spawned for the user to interact with.
