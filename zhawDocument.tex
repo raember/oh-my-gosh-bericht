@@ -104,20 +104,18 @@ Another one is to use this channel to tunnel more connections through it:
 For example can the traffic of an application which uses a specific \gls{port} be forwarded to the remote host.
 This can obscure and secure this traffic between the host and the server.
 
-The envisioned solution will simplify all the overloaded features of \gls{SSH} and provide a light alternative.
-
 \section{Telnet}\label{sec:Telnet}
 Telnet \citep{rfc15,rfc854} is an old (1969) and deprecated communication protocol which does not feature any security.
 However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.
 Telnet still has 23 as its very own \gls{port} assigned to it.
 
-Go-Telnet \citep{gotelnet} is a \gls{TELNETS} supporting client-server-application which has been implemented in \gls{Go}.
+It is also to mention that there is an application called Go-Telnet \citep{gotelnet}.
+This is a \gls{TELNETS} supporting client-server-application which has been implemented in \gls{Go}.
 
-In comparison to the envisioned project, the official Telnet solution does not provide a secure channel, which sets those two apart.
-
-\section{Berkeley r-commands}\label{sec:BerkeleyRCommands}
+\section{Berkeley r-Commands}\label{sec:BerkeleyRCommands}
 The Berkley r-commands are a set of commands to do certain tasks on remote hosts.
 Those tasks are similar to their counterparts without a leading ``\texttt{r}''.
+
 \begin{itemize}
 \item \cite{rlogin}
 
@@ -148,7 +146,9 @@ This command tells the user what users are currently logged in on the remote mac
 With this command, the user can see the \gls{uptime}, number of logged in users and current work load of the remote machine.
 \end{itemize}
 
-The envisioned solution will provide a secure channel to operate on a remote server, which the r-commands (specifically the \cite{rlogin} command) do not provide.
+It is to be noted that none of those commands support securing the communication channel in any way.
+This is also the reason why they got replaced by \gls{SSH}, as the latter does secure it's tunnel between a client and a server.
+
 
 \section{Task}\label{sec:Task}
 % Formuliert das Ziel der Arbeit
@@ -914,8 +914,7 @@ In the following lists, there are additional tasks described in section \ref{sec
 \begin{itemize}
 \item \textbf{A comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better}
 
-% TODO: Write more
-A small comparison to the surveyed solutions can be found at sections \ref{sec:OpenSSH}, \ref{sec:Telnet} and \ref{sec:BerkeleyRCommands}.
+A small comparison to the surveyed solutions can be found in section \ref{sec:Comparison}.
 
 \item \textbf{A detailed analysis of the security of the solution, including
 possible attacks and defenses}
@@ -935,6 +934,52 @@ An overview of the developed applications can be found in chapter \ref{chp:Resul
 
 This is a task that has not been solved in this thesis but its addition is discussed in subsection \ref{ssec:Rsync}.
 \end{itemize}
+
+
+\section{Comparison}\label{sec:Comparison}
+\subsection{OpenSSH}\label{ssec:CompOpenSSH}
+As described in section \ref{sec:OpenSSH}, \gls{SSH} uses an own protocol to secure the connection between client and server.
+This project differs in this point, as it uses \gls{TLS} to create a secure channel (see \ref{sec:DesignSecureConnection} and \ref{sec:ImplSecureConnection}).
+
+Both \gls{SSH} and the developed solution provide means to login with a user/password combination or via keys.
+This feature behaves the same in both cases.
+
+\gls{SSH} has a plethora of features that are not supported by the solution, but also were not required.
+The reason for that is simply because the task was to create a simple alternative.
+
+Both have privilege separation mechanisms implemented, but the developed solution was not able to drop the privilege of the host process after \gls{login}.
+This is another point where the two differ.
+That the solution does not drop privileges after \gls{login} is also listed as a security issue in section \ref{sec:Security}.
+
+Authentication in \gls{SSH} are per default solved using \gls{PAM}, which can be changed in the configuration files.
+Although the project in earlier stages used \gls{PAM} as well, it outsourced the \gls{login} functionality to \cite{login}, which in turn uses \gls{PAM} as well.
+
+\gls{SSH} also performs \gls{login} accounting in each case, whereas the solution again outsources this mechanism to \cite{login} or omits it completely (in the case of authentication via keys).
+This is a feature that is missing from the project (see \ref{ssec:UsingUtmpx}).
+
+\subsection{Telnet}\label{ssec:CompTelnet}
+In comparison to \cite{telnet}, the solution has several differences, that distinguishes it from the old protocol.
+For one, the communication channel of \cite{telnet} is not secured.
+The developed solution however provides a \gls{TLS} secured communication tunnel.
+This is the main difference between these two.
+
+Furthermore, \cite{telnet} does not support authentication via keys, which is a feature that has been implemented in the project.
+Authentication via keys is also performed using \gls{PAM}.
+
+Just as in the case of \gls{SSH}, it also does proper \gls{login} accounting, which as mentioned before is missing in the solution when authenticating via keys.
+
+\subsection{Berkeley r-Commands}\label{ssec:BerkeleyRCommands}
+From the list of Berkeley r-commands, only \cite{rlogin} is of interest, as the other ones are used with slightly different use cases in mind.
+The only other one that could be compared to as well is \cite{rsh}, which without a command to execute on the remote server behaves the same as \cite{rlogin}.
+
+As mentioned in section \ref{sec:Telnet}, the communication channel of \cite{rlogin} is not secured.
+Just as with \cite{telnet}, user-password combinations are sent over a network in plain text and can be read without much difficulty.
+This gets prevented in the developed solution by relying on \gls{TLS}.
+
+The r-commands also do not support authentication via keys, which has been implemented in the solution.
+The authentication via password on the other hand is virtually the same, as both use \cite{login} to accomplish this task.
+This also goes for using \gls{PAM} for authentication, \gls{login} accounting and the post-\gls{login} actions the server performs.
+
 
 \section{Security}\label{sec:Security}
 Although the solution uses \gls{TLS} as a security measure, the current state of the project still has several weaknesses.
@@ -1016,6 +1061,11 @@ In earlier stages of the project the authentication via password was already par
 For other reasons (see \ref{sec:ImplAuthViaPw}) this was dropped in favor of \cite{login}.
 It is suggested to return to using \gls{PAM} directly and also handle \gls{login} accounting (see \ref{sec:DesignLoginAccounting}) as well.
 
+\subsection{Using Utmpx}\label{ssec:UsingUtmpx}
+Part of post-\gls{login} actions are \gls{login} accounting, which would be realized using \gls{Linux}' \texttt{utmpx}-\gls{API}.
+This does happen in the case of relying on \cite{login}, but not in the case of authentication via keys.
+The session is therefore not properly set up and should be added in future works.
+
 \subsection{Add Transfer of SIGWINCH}\label{ssec:AddTransferOfSIGWINCH}
 As mentioned in section \ref{sec:ImplStartingTheShell}, the \gls{SIGWINCH} is not being transferred to the \gls{shell}.
 This means that the \gls{shell} assumes default values for window width and height, which leads to faulty formatting.
@@ -1083,5 +1133,9 @@ Reason for this is because in the beginning of the project, Mr Schwarz was respo
 % (Datenträger mit weiteren Daten(z.B. Software-Komponenten) inkl. Verzeichnis der auf diesem Datenträger abgelegten Dateien)
 % (Softwarecode)
 Please refer to the USB-stick that has been handed in with this thesis.
+The Git repository for the code (private) is located at:
+\url{https://github.engineering.zhaw.ch/neut/oh-my-gosh}
+and the documentation (clear-net) at:
+\url{https://github.engineering.zhaw.ch/neut/oh-my-gosh-bericht}.
 
 \end{document}

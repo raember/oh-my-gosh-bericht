@@ -36,6 +36,7 @@
 \ProcessOptions\relax
 \LoadClass{scrreprt}
 
+
 \RequirePackage[scaled]{uarial}
 	\renewcommand*\familydefault{\sfdefault}
 \RequirePackage[T1]{fontenc}
@@ -52,6 +53,7 @@
 \RequirePackage{pdflscape}
 \RequirePackage{pdfpages}
 \RequirePackage{makeidx}
+\PassOptionsToPackage{hyphens}{url} % Allow for line breaks within urls
 \RequirePackage{url}
 \RequirePackage{wallpaper}
 \RequirePackage{float}
