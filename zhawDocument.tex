@@ -107,7 +107,7 @@ This can obscure and secure this traffic between the host and the server.
 The envisioned solution will simplify all the overloaded features of \gls{SSH} and provide a light alternative.
 
 \section{Telnet}\label{sec:Telnet}
-Telnet \citep{rfc15,rfc854} is an old (1969) and deprecated communication protocol which doesn't feature any security.
+Telnet \citep{rfc15,rfc854} is an old (1969) and deprecated communication protocol which does not feature any security.
 However, in other implementations, \gls{TELNETS} was proposed, which features encryption over the communication channel.
 Telnet still has 23 as its very own \gls{port} assigned to it.
 
@@ -267,7 +267,7 @@ To spawn the default \gls{shell} of a user, the path to said \gls{shell} is requ
 This and other information can be found inside the \texttt{/etc/passwd} file.
 The file holds information about a users \gls{login}-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory.
 To spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully log in a user.
-To query such data, \gls{Unix} offers \cite{getpw}, which doesn't just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist.
+To query such data, \gls{Unix} offers \cite{getpw}, which does not just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist.
 This has been used in the implementation phase (see \ref{sec:ImplUserDataQuerying}):
 \setlistingC
 \begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
@@ -510,7 +510,7 @@ Therefore, it was necessary to abandon the clean solution of forking and instead
 The question then was:
 How can a process instantiate a child process and hand over all resources to it necessary for handling the new connection?
 
-Since they are two separate processes now, they don't share any memory anymore.
+Since they are two separate processes now, they do not share any memory anymore.
 Hence the parent has to give the child the information about the connection via arguments.
 The most direct way to deal with this is to use \glspl{fd}, which can be passed as integer arguments to the child.
 
@@ -587,6 +587,7 @@ The files \texttt{key.pem} and \texttt{certificate.pem} can be found inside the 
 
 The current implementation is set to skip verification of insecure certificates.
 Handling such a case has been decided to be handled in future improvements.
+The security aspects of this implementation are discussed in subsection \ref{ssec:SecSecureConnection}.
 
 \section{Authentication via Password}\label{sec:ImplAuthViaPw}
 There are no official packages in \gls{Go} that provide a wrapper to \gls{PAM} (refer to \ref{sec:DesignAuthViaPw}).
@@ -614,7 +615,7 @@ This authentication is sufficiently secure from third parties which do not have 
 This mechanism has been implemented but with some alterations.
 
 The first change was to store the public key in a plain text format, which was done out of convenience and can be changed in the future.
-Not storing the hashed public key doesn't pose any security threat, so fixing this deviation was deemed of low priority.
+Not storing the hashed public key does not pose any security threat, so fixing this deviation was deemed of low priority.
 
 The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory.
 This is a sub-optimal approach, as his requires users to store their public keys in the super user's directory, which can lead to mistakes.
@@ -655,6 +656,8 @@ cmd.SysProcAttr = &syscall.SysProcAttr{
 }
 cmd.Env = []string{"TERM=xterm-256color"}
 \end{lstlisting}
+
+The transfer of the \gls{SIGWINCH} has not been realized in this project however.
 
 
 \section{Login Accounting}\label{sec:ImplLoginAccounting}
@@ -771,7 +774,7 @@ Both these transfers are performed using \gls{Go}'s \texttt{WriteTo} method:
 func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
 \end{lstlisting}
 
-This mechanism performed well enough for the project, as it didn't take up too much resources and could be conveniently parallelized.
+This mechanism performed well enough for the project, as it did not take up too much resources and could be conveniently parallelized.
 
 
 \section{Service Hosting}\label{sec:ImplServiceHosting}
@@ -865,77 +868,164 @@ To change the log level, giving the application the environment variable \texttt
 % Interpretation und Validierung der Resultate
 % Rückblick auf Aufgabenstellung, erreicht bzw. nicht erreicht
 % Legt dar, wie an die Resultate (konkret vom Industriepartner oder weiteren Forschungsarbeiten; allgemein) angeschlossen werden kann; legt dar, welche Chancen die Resultate bieten
-As described in \ref{chp:Results}, the developed solution is capable of providing a \gls{TLS} secured channel to an interactive session of a remote user's \gls{shell}, of which the privilege has been dropped to the appropriate level for said user.
+As described in chapter \ref{chp:Results}, the developed solution is capable of providing a \gls{TLS} secured channel to an interactive session of a remote user's \gls{shell}, of which the privilege has been dropped to the appropriate level for said user.
 It can be said that with this, the main goal of this thesis could be achieved.
 In the following list, an overview of the solutions to the official tasks are given and explained:
 \begin{itemize}
 \item \textbf{Design and implement a client-server protocol that can manage interactive sessions}
 
-This has been completed in \ref{chp:Design} and \ref{chp:Implementation} respectively.
+This has been completed in chapters \ref{chp:Design} and \ref{chp:Implementation} respectively.
+Both chapters give an overview and then list certain points of interest to be highlighted.
 
 \item \textbf{Design and implement a privilege-separation architecture on the server side that allows safe dropping of privileges once a client establishes a connection}
 
-The design has been discussed in \ref{sec:DesignPrivilegeSeparation} and the implementation and problems encountered displayed in \ref{sec:Problems} respectively.
+The design has been discussed in section \ref{sec:DesignPrivilegeSeparation} and the implementation and problems encountered displayed in subsection \ref{ssec:PrivilegeDropping} respectively.
 Despite the encountered problems, a privilege separation was still realized.
 \end{itemize}
 
-As described in \ref{sec:Task}, the following tasks are required for a passing grade:
+As described in section \ref{sec:Task}, the following tasks are required for a passing grade:
 
 \begin{itemize}
 \item \textbf{An introduction to the problem and why the envisaged solution will solve it}
 
-This has been discussed in \ref{chp:Introduction}.
+This has been discussed in chapter \ref{chp:Introduction}.
 
 \item \textbf{A survey of related work in the area}
 
-Related works are listed and discussed in \ref{chp:Introduction} as well (specifically in \ref{sec:OpenSSH}, \ref{sec:Telnet} and \ref{sec:BerkeleyRCommands}).
+Related works are listed and discussed in chapter \ref{chp:Introduction} as well (specifically in the sections \ref{sec:OpenSSH}, \ref{sec:Telnet} and \ref{sec:BerkeleyRCommands}).
 
 \item \textbf{A detailed design of the solution}
 
-The entire design can be found at \ref{chp:Design}.
+The entire design can be found in chapter \ref{chp:Design}.
+The implementation differs from the original design however, which is also discussed in chapter \ref{chp:Implementation}.
 
 \item \textbf{An evaluation of the performance of the implemented solution}
 
-An explanation to this task can be found at \ref{ssec:Performance}.
+% TODO: Write more
+An explanation to this task can be found at subsection \ref{ssec:Performance}.
 
 \item \textbf{A privilege-separation architecture}
 
-This is the same as the first task and can be considered solved as of \ref{sec:DesignPrivilegeSeparation} and \ref{sec:Problems}.
+This is the same as the first task and can be considered solved as of section \ref{sec:DesignPrivilegeSeparation} with remark to subsection \ref{ssec:PrivilegeDropping}.
 \end{itemize}
 
-In the following lists, there are additional tasks described in \ref{sec:Task}:
+In the following lists, there are additional tasks described in section \ref{sec:Task}:
 
 \begin{itemize}
 \item \textbf{A comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better}
 
-A small comparison to the surveyed solutions can be found at \ref{sec:OpenSSH}, \ref{sec:Telnet} and \ref{sec:BerkeleyRCommands}.
+% TODO: Write more
+A small comparison to the surveyed solutions can be found at sections \ref{sec:OpenSSH}, \ref{sec:Telnet} and \ref{sec:BerkeleyRCommands}.
 
 \item \textbf{A detailed analysis of the security of the solution, including
 possible attacks and defenses}
 
-This task will be cleared in this chapter.
+This task will be cleared later in this chapter: The section \ref{sec:Security} clears this task.
 
 \item \textbf{Use of TLS as the transport layer}
 
-This topic is also considered solved as of \ref{sec:DesignSecureConnection} and \ref{sec:ImplSecureConnection}.
+This topic can also be considered solved as of sections \ref{sec:DesignSecureConnection} and \ref{sec:ImplSecureConnection}.
 
 \item \textbf{A proof-of-concept client that can handle interactive sessions}
 
 A usable client has been developed and can be used after compilation of the source code.
-An overview of the developed applications can be found in \ref{chp:Results}.
+An overview of the developed applications can be found in chapter \ref{chp:Results}.
 
 \item \textbf{A proof-of-concept client that works as a transport for rsync}
 
-This is a task that has not been solved in this thesis but its addition is discussed later in this chapter.
+This is a task that has not been solved in this thesis but its addition is discussed in subsection \ref{ssec:Rsync}.
 \end{itemize}
 
-%\section{Security}\label{sec:Security}
-%\subsection{Secure Connection}\label{sec:SecSecureConnection}
-%\subsection{Authentication}\label{sec:SecAuthentication}
-%\subsection{Login}\label{sec:SecLogin}
-%
-%\section{Prospects}\label{sec:Prospects}
-% - utmpx
+\section{Security}\label{sec:Security}
+Although the solution uses \gls{TLS} as a security measure, the current state of the project still has several weaknesses.
+Some of them seem to be of a lower magnitude, whereas others have a higher priority to be resolved.
+This section lists some security issues that have been solved and others that are still unsolved.
+
+\subsection{Secure Connection}\label{ssec:SecSecureConnection}
+A secure channel is mandatory in an architecture like this.
+As described in sections \ref{sec:DesignSecureConnection} and \ref{sec:ImplSecureConnection}, the connection has been secured using \gls{TLS} (specifically \gls{TLS} 1.3).
+This means an attacker has to deal with the security measures that \gls{TLS} brings with itself.
+
+Apart from that, the current solution only uses a server-side certificate;
+The client's certificate is never checked as it does not exist in the current solution.
+This means an attacker that knows the \gls{login} credentials of a user on the remote system can log in in the system and deal harm to it without the server being able to distinguish the attacker machine from the expected client.
+Using client-side certificates could help to increase the level of difficulty of an attacker to perform this attack.
+
+Furthermore, in the current solution, insecure server certificate errors simply get ignored.
+An attacker can use this to take on the role of a ``man in the middle''.
+This attack vector allows the attacker to appear to the client like it is the server the client wants to log in to and at the same time appear to the server as if it is the client trying to connect to it.
+This leads to two \gls{TLS} connections:
+One from the client to the attacker and one from the attacker to the server.
+This means the attacker can read the entire data stream in an unencrypted way and manipulate as desired.
+This also leads to possible password exposure to the attacker if the client authenticates itself via password to the server.
+Therefore this weakness is considered a severe security issue that can easily be exploited by an attacker by simply sitting between the two connecting parties.
+To prevent such attacks, the certificate verification cannot be skipped.
+
+
+\subsection{Authentication}\label{ssec:SecAuthentication}
+As described in sections \ref{sec:DesignAuthViaPw}, \ref{sec:ImplAuthViaPw} and \ref{sec:ImplAuthViaKeys}, two possible paths of authentication were realized.
+
+\subsubsection{Authentication via Password}\label{sssec:SecAuthViaPw}
+Relying on \cite{login} simplified the task, as time was pressing.
+Using this standardized command also helps removing possible security issues in the authentication process and afterwards.
+However, this comes with a cost:
+The \cite{login} command allows a user to directly log in as \texttt{root} user.
+This cannot be prevented by the server.
+Ideally the server would have a default option of allowing root login set to false.
+There is no reason to allow any client to try to log in as \texttt{root} user.
+Especially since a logged in user can simply use \texttt{su} or \texttt{sudo} to gain \texttt{root} privileges.
+``\texttt{root}'' however is the only user name that can be logged in and an attacker knows exists and only needs the knowledge of one password (which \textit{could} be a default password) to gain full system control.
+
+Another way to prevent \texttt{root} user login despite the usage of \cite{login} could be to pre-fetch the user credentials from the client (see \ref{ssec:PrefetchingOfCredentials}).
+
+\subsubsection{Authentication via Keys}\label{sssec:SecAuthViaKeys}
+When authenticating a user via public key cryptography, the server looks up which users can be logged in.
+It does so by looking into the \texttt{root} user's home directory \texttt{/root/.gosh}.
+There, the directory structure defines what public key can log in as which user.
+In this case, Each directory has the name of a user and inside are the public keys stored in plain text with the file name of the \texttt{USER} value of the connecting client.
+This for one means that to allow a remote user to log in as this very user, the remote user's public key has to be named after that user's name and placed into the \texttt{root} user's home directory.
+Storing such files in the \texttt{root} user's home directory is a bad idea as this means that every change to this file structure needs \texttt{root} privileges.
+The public keys are also stored in plain text, which is not needed and can be replaced with their hashes instead as described in section \ref{sec:ImplAuthViaKeys}.
+
+\subsection{Privilege Separation}\label{ssec:SecPrivilegeSeparation}
+To have a proper privilege separation (see section \ref{sec:DesignPrivilegeSeparation}), the host process should also drop its privileges once the \gls{login} succeeded.
+This is desired as the forwarding of the data is still in the host's hands and as the host still runs with \texttt{root} privileges, an attacker could potentially gain \texttt{root} access if the attacker manages to gain access to that process.
+Such privilege escalation should be prevented but was not entirely achieved in the current solution, as described in subsection \ref{ssec:PrivilegeDropping}.
+
+
+\section{Prospects}\label{sec:Prospects}
+Although the project created a working alternative to \gls{SSH}, there are several points that have to be improved, which couldn't be completed in the course of this thesis.
+These points are listed here:
+
+\subsection{Security Issues}\label{ssec:SecurityIssues}
+Of course the primary task to solve in further works would be to solve the security issues with this project.
+As this project should be able to replace \gls{SSH} in its core functions, the security aspects have to be comparable as well.
+Suggestions on how to solve the above mentioned security issues can be found in the respective subsections \ref{ssec:SecSecureConnection}, \ref{ssec:SecAuthentication} and \ref{ssec:SecPrivilegeSeparation}.
+
+\subsection{Rsync}\label{ssec:Rsync}
+One of the proposed extensions was to use this project's solution as a transport layer for \texttt{rsync}.
+This could not be achieved in the course of this project, but could be done in subsequent works.
+
+\subsection{Prefetching of Credentials}\label{ssec:PrefetchingOfCredentials}
+Instead of forwarding the client's inputs to the \gls{login} mechanism, the client could ask the user for user name and password beforehand and send them to the server.
+The server can then check for the user name to be sane (for example for preventing \texttt{root} login) and only then forward it to \cite{login}.
+This could solve the security issue discussed in subsection \ref{ssec:SecAuthentication}.
+
+\subsection{Using PAM}\label{ssec:UsingPAM}
+In earlier stages of the project the authentication via password was already partially solved by using \gls{PAM}.
+For other reasons (see \ref{sec:ImplAuthViaPw}) this was dropped in favor of \cite{login}.
+It is suggested to return to using \gls{PAM} directly and also handle \gls{login} accounting (see \ref{sec:DesignLoginAccounting}) as well.
+
+\subsection{Add Transfer of SIGWINCH}\label{ssec:AddTransferOfSIGWINCH}
+As mentioned in section \ref{sec:ImplStartingTheShell}, the \gls{SIGWINCH} is not being transferred to the \gls{shell}.
+This means that the \gls{shell} assumes default values for window width and height, which leads to faulty formatting.
+This feature should be implemented to make the interactive session more seamless.
+
+\subsection{Forwarding of Data Flow}\label{ssec:ForwardingOfDataFlow}
+As of now, the solution simply calls forwarding routines to transfer the data flow between the \gls{shell} (of more specifically, the \gls{ptm}) and the connection to the client.
+This sometimes leads to an unclean session breakdown when terminating.
+It is therefore desirable to implement the data forwarding with other means.
+Possible \gls{Linux} support could be drawn from the functions \cite{select} or \cite{poll}.
 
 
 \chapter{Index}\label{chp:Index}
