@@ -754,29 +754,6 @@ func Open() (master *os.File, slave string, err error) {
 For the project, this code has been altered to better fit the flow of the application.
 
 
-\subsection{Performance}\label{ssec:Performance}
-The \gls{pty} is an interface that needs data to be forwarded to and received from.
-This holds true for both sides (\gls{ptm} and the \gls{pts}) and therefore needs a mechanism to transfer said data.
-On the slave side, the \gls{shell} itself already seamlessly communicates with the device via its standard pipes.
-A similar concept is applied for the client and its connection to the server, where the application communicates via the connection with the server.
-There, the client uses a \gls{Go}-routine to asynchronously forward the standard input of the program to the connection.
-
-The master side has to transfer the input from the remote client to the \gls{ptm} and the output from the latter to the former as well.
-For this, the server uses two \gls{Go}-routines that asynchronously forward the data from each stream to the other and waits until the shell process terminates.
-
-Both these transfers are performed using \gls{Go}'s \texttt{WriteTo} method:
-\setlistingGo
-\begin{lstlisting}[caption={\texttt{WriteTo} method of \gls{Go}},label=lst:GoWriteTo]
-// WriteTo implements io.WriterTo.
-// This may make multiple calls to the Read method of the underlying Reader.
-// If the underlying reader supports the WriteTo method,
-// this calls the underlying WriteTo without buffering.
-func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
-\end{lstlisting}
-
-This mechanism performed well enough for the project, as it did not take up too much resources and could be conveniently parallelized.
-
-
 \section{Service Hosting}\label{sec:ImplServiceHosting}
 The \texttt{goshd} program has to run on a server to accept incoming requests.
 For ease of use, the program should be able to be run as a \gls{daemon}.
@@ -846,7 +823,7 @@ The communication is secured in the beginning of the transaction using \gls{TLS}
 To test the applications, the user can execute the binaries from within the root folder of the project on both the client and the server (they can be the same machine, if so desired).
 To do this, the user can make use of the \gls{CLI} flags described above to redirect the dependencies to the test files in the project:
 \setlistingBash
-\begin{lstlisting}[caption={Running the applications for test purposes},label=lst:RunProject]
+\begin{lstlisting}[caption={Running the applications for test purposes},label=lst:RunProject,deletekeywords={test}]
 # Setup environment: Create test user, its home directory and the login shell.
 ./scripts/setup.sh
 
@@ -902,7 +879,7 @@ The implementation differs from the original design however, which is also discu
 \item \textbf{An evaluation of the performance of the implemented solution}
 
 % TODO: Write more
-An explanation to this task can be found at subsection \ref{ssec:Performance}.
+An explanation to this task can be found at subsection \ref{sec:Performance}.
 
 \item \textbf{A privilege-separation architecture}
 
@@ -934,6 +911,48 @@ An overview of the developed applications can be found in chapter \ref{chp:Resul
 
 This is a task that has not been solved in this thesis but its addition is discussed in subsection \ref{ssec:Rsync}.
 \end{itemize}
+
+
+
+\section{Performance}\label{sec:Performance}
+The \gls{pty} is an interface that needs data to be forwarded to and received from.
+This holds true for both sides (\gls{ptm} and the \gls{pts}) and therefore needs a mechanism to transfer said data.
+On the slave side, the \gls{shell} itself already seamlessly communicates with the device via its standard pipes.
+A similar concept is applied for the client and its connection to the server, where the application communicates via the connection with the server.
+There, the client uses a \gls{Go}-routine to asynchronously forward the standard input of the program to the connection.
+
+The master side has to transfer the input from the remote client to the \gls{ptm} and the output from the latter to the former as well.
+For this, the server uses two \gls{Go}-routines that asynchronously forward the data from each stream to the other and waits until the shell process terminates.
+
+Both these transfers are performed using \gls{Go}'s \texttt{WriteTo} method:
+\setlistingGo
+\begin{lstlisting}[caption={\texttt{WriteTo} method of \gls{Go}},label=lst:GoWriteTo]
+// WriteTo implements io.WriterTo.
+// This may make multiple calls to the Read method of the underlying Reader.
+// If the underlying reader supports the WriteTo method,
+// this calls the underlying WriteTo without buffering.
+func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
+\end{lstlisting}
+
+This mechanism helps keeping the memory usage low.
+
+As for speed, the application has been tested on speed of the connection:
+Once it was tested with the raw connection and once when traveling using \gls{TLS}.
+Achieved was this by simply sending data from \textit{/dev/zero} through the connection and printing the received data into the standard output.
+This was then piped into \textit{pv} and then into \textit{cat}, which redirected its output to \textit{/dev/null}:
+
+\setlistingBash
+\begin{lstlisting}[caption={Throughput measurement},label=lst:ThroughputMeasurement]
+sudo goshd | pv -a | cat > /dev/null
+\end{lstlisting}
+
+\begin{itemize}
+\item Raw connection: 1020MiB/s
+\item \gls{TLS} connection: 354MiB/s
+\end{itemize}
+
+This demonstrates that the application is sufficiently fast to be used in most use cases.
+Therefore later implementation of a feature of this solution to be used as a transport protocol (i.e. for \cite{rsync} - see \ref{ssec:Rsync}) is deemed viable.
 
 
 \section{Comparison}\label{sec:Comparison}
@@ -1048,7 +1067,7 @@ As this project should be able to replace \gls{SSH} in its core functions, the s
 Suggestions on how to solve the above mentioned security issues can be found in the respective subsections \ref{ssec:SecSecureConnection}, \ref{ssec:SecAuthentication} and \ref{ssec:SecPrivilegeSeparation}.
 
 \subsection{Rsync}\label{ssec:Rsync}
-One of the proposed extensions was to use this project's solution as a transport layer for \texttt{rsync}.
+One of the proposed extensions was to use this project's solution as a transport layer for \cite{rsync}.
 This could not be achieved in the course of this project, but could be done in subsequent works.
 
 \subsection{Prefetching of Credentials}\label{ssec:PrefetchingOfCredentials}
