@@ -29,7 +29,7 @@ The developed solution can replace \gls{SSH} in its core feature:
 Connecting to a \gls{shell} on a remote system.
 
 This project developed an application called ``oh-my-gosh'' that is capable of the same core functionality that \gls{SSH} provides. This includes a client application called ``gosh'' and a server counterpart with the name ``goshd''.
-The latter was designed to be run as a background process on a \gls{Unix} system.
+The latter was designed to be run as a background process on a \gls{Linux} system.
 This solution uses a secure connection as channel to provide more safety in the entire process.
 A user can authenticate itself on the remote system either via a password or using public key cryptography.
 All the usual work flows are possible on the \gls{shell} such as:
@@ -95,7 +95,7 @@ After it builds up a secure connection between a client and a server, it can be 
 It can also forward traffic on local ports to the remote host through the secure channel.
 This is also used by third party programs such as \cite{rsync}.
 
-When it comes to the log in procedure itself, \gls{SSH} allows for standard user log in using the \gls{API} of the \glspl{PAM}.
+When it comes to the log in procedure itself, \gls{SSH} allows for standard user \gls{login} using the \gls{API} of \gls{PAM}.
 Another feature is white listing of clients via their public keys, which stops intrusion attempts via hijacked user-password-credentials.
 
 After a secure connection could be established, there are multiple possibilities to use the opened channel.
@@ -200,7 +200,7 @@ However, there are multiple security concerns to be satiated:
 \end{itemize}
 
 Furthermore, this design does not allow for multiple sessions to be run in parallel.
-Therefore it was decided to run a new kernel-level thread to handle everything beginning after the connection has been established.
+Therefore it was decided to run a new kernel-level thread to handle everything after the connection has been established.
 This thread could also drop its privileges after the \gls{login} succeeded.
 
 Another action the server would have to take is to properly manage the session.
@@ -211,21 +211,21 @@ This \gls{login} accounting will allow for the logged in user to be displayed wi
 This led to  the following general flow of actions:
 
 \begin{enumerate}
-\item The server listens for incoming connection.
+\item The server listens for incoming connections.
 \item The client dials server.
-\item The host handles the established connection.
-\item The host sets up a secure connection (see \ref{sec:DesignSecureConnection}).
-\item The host requests necessary environment variables from the client.
+\item The server handles the established connection.
+\item The server sets up a secure connection (see \ref{sec:DesignSecureConnection}).
+\item The server requests necessary environment variables from the client.
 \item The client responds with the values of said variables.
-\item The host initiates a \gls{login} procedure.
+\item The server initiates a \gls{login} procedure.
 \item The client authenticates himself (see \ref{sec:DesignAuthViaPw}).
-\item The host gathers essential data about the logged in user (see \ref{sec:DesignUserDataQuerying}).
-\item The host performs the necessary post-\gls{login} actions that are expected in a \gls{Unix} environment (see \ref{sec:DesignLoginAccounting}).
-\item The host drops privilege to that of the logged in user (see \ref{sec:DesignPrivilegeSeparation}).
-\item The host spawns the users \gls{login} \gls{shell} (see \ref{sec:DesignStartingTheShell}) with the same credentials and forwards all traffic between \gls{shell} and client.
-\item The client uses the \gls{shell} on remote machine.
-\item The client terminates session.
-\item The host terminates.
+\item The server gathers essential data about the logged in user (see \ref{sec:DesignUserDataQuerying}).
+\item The server performs the necessary post-\gls{login} actions that are expected in a \gls{Unix} environment (see \ref{sec:DesignLoginAccounting}).
+\item The server drops privilege to that of the logged in user (see \ref{sec:DesignPrivilegeSeparation}).
+\item The server spawns the user's \gls{login} \gls{shell} (see \ref{sec:DesignStartingTheShell}) with the same credentials and forwards all traffic between \gls{shell} and client.
+\item The client uses the \gls{shell} on the remote machine.
+\item The client terminates the session.
+\item The server terminates.
 \end{enumerate}
 
 The sequence diagram in figure \ref{fig:SeqDiaOriginal} is an illustration of how the flow of actions was envisioned.
@@ -248,7 +248,7 @@ However, this led to a few problems in the implementation process (See \ref{sec:
 When building an application that communicates via the network, certain security measures are mandatory to ensure a secure communication.
 If such measures are not taken, the communication between the client and the server can be fully read and even altered by a third party.
 To prevent this, the communication can be encrypted with \gls{TLS} (originally known as \gls{SSL}).
-Today's state-of-the-art is \gls{TLS} 1.3\citep{rfc8446}.
+Today's state-of-the-art is \gls{TLS} 1.3 \citep{rfc8446}.
 
 When connecting, the client checks the server's \gls{X.509}-certificate to authenticate the peer.
 Optionally, the client can also authenticate himself to the server.
@@ -265,32 +265,13 @@ It is also possible to rely on the \cite{login} command, which also uses \gls{PA
 \section{User Data Querying}\label{sec:DesignUserDataQuerying}
 To spawn the default \gls{shell} of a user, the path to said \gls{shell} is required.
 This and other information can be found inside the \texttt{/etc/passwd} file.
-The file holds information about a users \gls{login}-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory.
+The file holds information about a user's \gls{login}-\gls{shell}, password hash, groups, user information, \gls{UID}, \gls{GID} and home directory.
 To spawn a \gls{shell}, the first and the last of these pieces of information are substantial to successfully log in a user.
-To query such data, \gls{Unix} offers \cite{getpw}, which does not just read the \texttt{passwd} file, but also draws information about users from other sources, if they exist.
-This has been used in the implementation phase (see \ref{sec:ImplUserDataQuerying}):
-\setlistingC
-\begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
-#include <sys/types.h>
-#include <pwd.h>
-
-struct passwd {
-	char   *pw_name;       /* username */
-	char   *pw_passwd;     /* user password */
-	uid_t   pw_uid;        /* user ID */
-	gid_t   pw_gid;        /* group ID */
-	char   *pw_gecos;      /* user information */
-	char   *pw_dir;        /* home directory */
-	char   *pw_shell;      /* shell program */
-};
-
-struct passwd *getpwnam(const char *name);
-struct passwd *getpwuid(uid_t uid);
-\end{lstlisting}
+To query such data, \gls{Unix} offers \cite{getpw}, which does not just read the \texttt{passwd} file, but also draws information about users from other sources like \gls{NIS} or \gls{LDAP}.
 
 
 \section{Starting the Shell}\label{sec:DesignStartingTheShell}
-A \gls{shell} requires a multitude of information before it can normally function:
+A \gls{shell} requires a multitude of information before it can function normally:
 \begin{itemize}
 \item The name of the user and the host.
 \item The \texttt{TERM} variable to allow for the use of \cite{ncurses} dependent applications.
@@ -304,17 +285,17 @@ Note that this is not the same as the display name of the user in the \texttt{US
 The host name is the same as the \texttt{HOSTNAME} environment variable of the parent process.
 
 There is also to note that for the usage of the correct terminal sequences, the \texttt{TERM} environment variable has to be known to the \gls{shell}.
-This is needed to use the correct escape sequences for example or for applications that use \cite{ncurses}.
+This is needed to use the correct escape sequences for applications that use \cite{ncurses}.
 
-A terminal or terminal emulator sends a \gls{SIGWINCH} to its child process to notify a change in its window size.
-If this is not forwarded, then the width and size the shell assumes might collide with the actual values and lead to overflowing lines and unused space.
+A \gls{tty} or terminal emulator sends a \gls{SIGWINCH} to its child process to notify a change in its window size.
+If this is not forwarded, then the width and size the shell assumes, might collide with the actual values and lead to overflowing lines and unused space.
 
 To take full control of the terminal, the \gls{shell} has to be the session leader.
 This can be achieved by letting it set the \gls{SID}.
 If it is not set, the \gls{shell} will print some errors regarding the \texttt{ioctl} device.
 
 \section{Login Accounting}\label{sec:DesignLoginAccounting}
-When a user logs into a \gls{Unix} machine, a session and a time stamp gets created.
+When a user logs into a \gls{Unix} machine, a session and a time stamp get created.
 
 For this, the two files \texttt{/var/run/utmp} and \texttt{/var/log/wtmp} provide the appropriate storage.
 The \texttt{utmpx} \gls{API} offers appropriate functions.
@@ -353,7 +334,7 @@ The application has to set the \texttt{ut\_type} field of the \texttt{utmpx} str
 Similarly to the \texttt{utmp} update after \gls{login}, the application has to report to the \texttt{utmpx} \gls{API} that the session ended.
 This procedure consists of almost the same actions as the one after logging in, with exception of \texttt{ut\_user} being zeroed out and \texttt{ut\_type} being set to \texttt{DEAD\_PROCESS}\citep[p.828]{KerriskTLPI}.
 
-A program can also query the \texttt{utmp} file with the according \texttt{get} methods.
+A program can also query the \texttt{utmp} file with the according \texttt{get*} methods:
 \setlistingC
 \begin{lstlisting}[caption={\texttt{utmpx} \gls{API} functions},label=lst:UtmpxApiFunctions]
 #include <utmp.h>
@@ -378,11 +359,11 @@ int pam_close_session(pam_handle_t *pamh, int flags);
 \end{lstlisting}
 
 \section{Privilege Separation}\label{sec:DesignPrivilegeSeparation}
-Allowing a user to log in as any user, the authenticating process has to have \texttt{root} rights.
+Allowing a user to log in as any user requires the authenticating process to have \texttt{root} rights.
 However: After performing the authentication procedure and after successfully finishing the latter, a \gls{shell} will be spawned for the user to interact with.
 This implies that without dropping the privilege of the process down to the appropriate privileges of the logged in user, the \gls{shell} would run with \texttt{root} rights, which is a privilege escalation and not permissible.
 
-\gls{Linux} provides \cite{setuid} to set the owning user of a process and therefore also changing it's permissions.
+\gls{Linux} provides \cite{setuid} and \cite{setgid} to set the owning user/group of a process and therefore also changing it's permissions.
 Unless the user is \texttt{root}, the process' owner cannot be changed.
 
 In comparison: \gls{SSH} chains the authentication of a user between an unprivileged child process that forwards the information between the two processes (see figure \ref{fig:PrivilegeSeparationInSSH}) - thereby putting a privilege separation in place.
@@ -396,40 +377,41 @@ In comparison: \gls{SSH} chains the authentication of a user between an unprivil
 
 \chapter{Implementation}\label{chp:Implementation}
 The implementation of the project differs from the envisioned design.
-This new version of the server has two executables:
+This new version of the server has three executables:
 
 \begin{itemize}
+\item The first is the client-side application, that is used to connect to a server.
 \item One is \texttt{goshd}, a \gls{daemon} (also refer to \ref{sec:ImplServiceHosting}), which only has one function:
 To listen for incoming connections and then to start a child process of the second executable.
-\item This second executable is the host (\texttt{goshh}) and it is responsible for handling the new connection.
+\item This last executable is the host (\texttt{goshh}) and it is responsible for handling the new connection.
 \end{itemize}
 
 Now, the work flow of the solution looks as follows (note that unchanged entries are \textcolor{gray}{gray}):
 \begin{enumerate}
-\item \textcolor{gray}{The server listens for incoming connection.}
+\item \textcolor{gray}{The server listens for incoming connections.}
 \item \textcolor{gray}{The client dials server.}
-\item The server executes \texttt{goshh} as a child process.
-\item \textcolor{gray}{The host handles the established connection.}
-\item \textcolor{gray}{The host sets up a secure connection} (see \ref{sec:ImplSecureConnection}).
-\item \textcolor{gray}{The host requests necessary environment variables from the client.}
+\item The server executes \texttt{goshh} as a child process (referred to as ``host'' in subsequent steps).
+\item \textcolor{gray}{The} host \textcolor{gray}{handles the established connection.}
+\item \textcolor{gray}{The} host \textcolor{gray}{sets up a secure connection} (see \ref{sec:ImplSecureConnection}).
+\item \textcolor{gray}{The} host \textcolor{gray}{requests necessary environment variables from the client.}
 \item \textcolor{gray}{The client responds with the values of said variables.}
-\item The host notifies the client to prepare itself for the session.
+\item \textcolor{gray}{The} host \textcolor{gray}{notifies the client to prepare itself for the session.}
 \item the client sets the appropriate \gls{tty} mode (see \ref{sec:ImplTerminalMode}).
-\item \textcolor{gray}{The host initiates a \gls{login} procedure}
+\item \textcolor{gray}{The} host \textcolor{gray}{initiates a \gls{login} procedure}
 \begin{itemize}
-	\item The host finds a public key that belongs to the client.
+	\item The host finds a public key that belongs to the client and is authorized for \gls{login} on the specific user account.
 	The host now initiates authentication via keys (see \ref{sec:ImplAuthViaKeys}):
 	\begin{enumerate}
 		\item The host encrypts a random secret with it and then sends that to the client.
-		\item The client decrypts the secret and sends back the answer.
+		\item The client decrypts the secret and sends the answer back.
 		\item The host checks whether the received answer matches the original secret:
 		\begin{itemize}
 			\item If it matches, the authentication has succeeded.
 			\begin{enumerate}
-				\item \textcolor{gray}{The host gathers essential data about the logged in user} (see \ref{sec:ImplUserDataQuerying}).
-				\item \textcolor{gray}{The host spawns the users \gls{login} \gls{shell} (see \ref{sec:DesignStartingTheShell}} and \ref{sec:ImplStartingTheShell}\textcolor{gray}{) with the credentials of the logged in user and forwards all traffic between \gls{shell} and client.}
+				\item \textcolor{gray}{The} host \textcolor{gray}{gathers essential data about the logged in user} (see \ref{sec:ImplUserDataQuerying}).
+				\item \textcolor{gray}{The} host \textcolor{gray}{spawns the users \gls{login} \gls{shell} (see \ref{sec:DesignStartingTheShell}} and \ref{sec:ImplStartingTheShell}\textcolor{gray}{) with the credentials of the logged in user and forwards all traffic between \gls{shell} and client.}
 			\end{enumerate}
-			\item If it fails, the authentication via keys has failed and instead, the authentication via password gets initiated-
+			\item If it fails, the authentication via keys has failed and instead, the authentication via password gets initiated.
 		\end{itemize}
 	\end{enumerate}
 	\item The host does not find a public key that matches the client or the authentication with keys did not succeed.
@@ -441,16 +423,16 @@ Now, the work flow of the solution looks as follows (note that unchanged entries
 \item \textcolor{gray}{The client uses the \gls{shell} on remote machine.}
 \item The session ends in particular ways:
 \begin{itemize}
-	\item \textcolor{gray}{The client terminates session} by logging out of the \gls{shell}.
+	\item \textcolor{gray}{The client terminates session.}
 	\begin{enumerate}
 		\item The child process of the host terminates.
-		\item \textcolor{gray}{The host terminates.}
+		\item \textcolor{gray}{The} host \textcolor{gray}{terminates.}
 	\end{enumerate}
 	\item The client dies.
 	\begin{enumerate}
 		\item The connection dies.
 		\item The \gls{shell} receives \texttt{EOF} and terminates.
-		\item \textcolor{gray}{The host terminates.}
+		\item \textcolor{gray}{The} host \textcolor{gray}{terminates.}
 	\end{enumerate}
 	\item The host dies or receives a \gls{SIGINT}.
 	\begin{enumerate}
@@ -460,7 +442,7 @@ Now, the work flow of the solution looks as follows (note that unchanged entries
 	\item The server dies or receives a \gls{SIGINT}.
 	\begin{enumerate}
 		\item The server sends a \gls{SIGINT} to all the active hosts.
-		\item \textcolor{gray}{The host terminates.}
+		\item \textcolor{gray}{The} host \textcolor{gray}{terminates.}
 		\item The connection dies.
 		\item The client receives \texttt{EOF} and terminates.
 	\end{enumerate}
@@ -477,7 +459,7 @@ A new sequence diagram was created after the rough finishing of the project to d
 
 In the process of implementing this project, several problems arose that had to be addressed.
 The reason being that some envisioned features or mechanisms could not be implemented as originally thought.
-This is also the reason why the work flow described in the beginning of this chapter differs from that of the design in \ref{chp:Design}.
+This is also the reason why the work flow described in the beginning of this chapter differs from that of the design in chapter \ref{chp:Design}.
 
 \section{Problems}\label{sec:Problems}
 \subsection{Forking}\label{ssec:Forking}
@@ -485,7 +467,7 @@ To handle new established connections, it was deemed important to \cite{fork} th
 0 for the child process and a number greater than 0 for the parent to have the \gls{PID} of the child.
 
 In theory, this should have enabled the program to use \gls{Go}'s standard library capabilities to handle connections.
-However, there were several problems with this approach, which break the design discussed in \ref{sec:DesignPrivilegeSeparation}:
+However, there were several problems with this approach, which break the privilege separation design discussed in section \ref{sec:DesignPrivilegeSeparation}:
 
 \subsubsection{Forking not supported}\label{sssec:ForkingNotSupported}
 The \gls{Go} standard library does not support the classical \gls{C}-like forking.
@@ -566,6 +548,17 @@ This problem could not be solved in the course of this project.
 Instead, it was relied upon spawning the \gls{shell} already with set \gls{UID} and \gls{GID} values to ensure appropriate permissions.
 This worked out well, as looking at the process in a process monitor like \texttt{htop} showed that the spawned \gls{shell} does have the right \gls{UID} and \gls{GID}.
 
+\subsection{Terminal Process Group}\label{ssec:TerminalProcessGroup}
+A \gls{login} \gls{shell} such as \texttt{bash} expects a properly set up the \gls{fd} with \cite{ioctl} properly.
+This can be done by letting the process set \texttt{ctty}.
+However: Setting the corresponding flag when starting the process via \gls{Go} fails with an error.
+The solution omits this step, which shows in \texttt{bash} printing the following:
+
+\setlistingBash
+\begin{lstlisting}[caption={\texttt{bash} error when starting \gls{shell} without the \texttt{setctty} flag},label=lst:BashIoctlError]
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control for this shell
+\end{lstlisting}
 
 \section{Secure Connection}\label{sec:ImplSecureConnection}
 As described in \ref{sec:DesignSecureConnection}, \gls{TLS} was used to secure the connection between the client and the server.
@@ -638,7 +631,26 @@ This originally has been implemented by using a private \gls{Go} package that pa
 This was deemed incomplete, as a system can acknowledge users that are not listed in said file.
 An example of this is \gls{NIS} or \gls{LDAP}, which would not be covered by solely relying on the \texttt{passwd} file.
 
-In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines \cite{getpw}.
+In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines \cite{getpw} as described in section \ref{sec:DesignUserDataQuerying}.
+
+\setlistingC
+\begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
+#include <sys/types.h>
+#include <pwd.h>
+
+struct passwd {
+	char   *pw_name;       /* username */
+	char   *pw_passwd;     /* user password */
+	uid_t   pw_uid;        /* user ID */
+	gid_t   pw_gid;        /* group ID */
+	char   *pw_gecos;      /* user information */
+	char   *pw_dir;        /* home directory */
+	char   *pw_shell;      /* shell program */
+};
+
+struct passwd *getpwnam(const char *name);
+struct passwd *getpwuid(uid_t uid);
+\end{lstlisting}
 
 \section{Starting the Shell}\label{sec:ImplStartingTheShell}
 In \gls{Go}, a process can be started with special settings.
@@ -942,10 +954,37 @@ func (b *Reader) WriteTo(w io.Writer) (n int64, err error)
 
 This mechanism helps keeping the memory usage low.
 
-As for speed, the application has been tested on speed of the connection:
+As for speed, the application has been tested on speed of the connection.
+For this, the client was changed to sending a stream of zeroes from \texttt{/dev/zero} to the connection once the latter has been established.
+The server-side on the other hand still spawns a \textit{host}, but that forwards the entire data received from the connection to its \texttt{stdout}.
+To measure the throughput, the server's output gets piped into pipeviewer (\texttt{pv}), with the following arguments:
+\begin{itemize}
+\item \texttt{-t}: show elapsed time
+\item \texttt{-r}: show data transfer rate counter
+\item \texttt{-a}: show data transfer average rate counter
+\item \texttt{-b}: show number of bytes transferred
+\item \texttt{-W}: display nothing until first byte transferred
+\end{itemize}
+The data stream gets then redirected to \texttt{/dev/null}.
+
+\setlistingBash
+\begin{lstlisting}[caption={Throughput measurement},label=lst:ThroughputMeasurement]
+# Set the log level to error to prevent sending bytes to pv before the client sends the stream
+sudo LOG_LEVEL=error goshd | pv -rabtW > /dev/null
+\end{lstlisting}
+
+Two variations of the test were performed:
+One using the blank \gls{Go} connection \texttt{net.Conn} and the other one having a \gls{TLS} layer in between.
+
+Using this as a basic setup, several tests were performed:
+\begin{itemize}
+\item On a native Arch \gls{Linux} laptop, the whole solution was tested over \gls{loopback}.
+\item Connected via a switch, a \gls{WSL} hosted the server. The same Arch \gls{Linux} laptop as in the former test connected to the former as the client.
+\end{itemize}
+
 Once it was tested with the raw connection and once when traveling using \gls{TLS}.
-Achieved was this by simply sending data from \textit{/dev/zero} through the connection and printing the received data into the standard output.
-This was then piped into \textit{pv} and then into \textit{cat}, which redirected its output to \textit{/dev/null}:
+Achieved was this by simply sending data from \texttt{/dev/zero} through the connection and printing the received data into the standard output.
+This was then piped into \texttt{pv} and then into \texttt{cat}, which redirected its output to \texttt{/dev/null}:
 
 \setlistingBash
 \begin{lstlisting}[caption={Throughput measurement},label=lst:ThroughputMeasurement]
