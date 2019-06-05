@@ -975,29 +975,36 @@ sudo LOG_LEVEL=error goshd | pv -rabtW > /dev/null
 
 Two variations of the test were performed:
 One using the blank \gls{Go} connection \texttt{net.Conn} and the other one having a \gls{TLS} layer in between.
+The equipment for this test consisted of a native Arch \gls{Linux} laptop and an Ubuntu \gls{Linux} running inside a native Window's \gls{WSL}.
 
 Using this as a basic setup, several tests were performed:
 \begin{itemize}
 \item On a native Arch \gls{Linux} laptop, the whole solution was tested over \gls{loopback}.
-\item Connected via a switch, a \gls{WSL} hosted the server. The same Arch \gls{Linux} laptop as in the former test connected to the former as the client.
+\item Similarly, the solution was also tested over \gls{loopback} in \gls{WSL}.
+\item Connected via a switch, \gls{WSL} hosted the server.
+The same Arch \gls{Linux} laptop as in the former test connected to the server as the client.
 \end{itemize}
 
-Once it was tested with the raw connection and once when traveling using \gls{TLS}.
-Achieved was this by simply sending data from \texttt{/dev/zero} through the connection and printing the received data into the standard output.
-This was then piped into \texttt{pv} and then into \texttt{cat}, which redirected its output to \texttt{/dev/null}:
+All the runs were performed for exactly one minute.
+The measured speeds are as follows:
+\begin{table}[ht]
+\centering
+\begin{tabular}{rcc}
+&\gls{TLS} (size) & no \gls{TLS} (size)\\\hline
+Arch \gls{Linux} (\gls{loopback}) 			& 427 MiB/s (25.1 GiB) & 1.15 GiB/s $\simeq$ 1177.6 MiB/s (69.0 GiB)\\
+\gls{WSL} (\gls{loopback}) 					& 69.7 MiB/s (4.09 GiB) & 116 MiB/s (6.82 GiB)\\
+Arch \gls{Linux} to \gls{WSL} (ethernet) 	& 85.1 MiB/s (4.99 GiB) & 83.7 MiB/s (4.91 GiB)
+\end{tabular}
+\caption{Throughput measurements}
+\label{tbl:}
+\end{table}
 
-\setlistingBash
-\begin{lstlisting}[caption={Throughput measurement},label=lst:ThroughputMeasurement]
-sudo goshd | pv -a | cat > /dev/null
-\end{lstlisting}
-
-\begin{itemize}
-\item Raw connection: 1020MiB/s
-\item \gls{TLS} connection: 354MiB/s
-\end{itemize}
+The throughput in \gls{WSL} never deviated by more than 8 MiB/s, whereas Arch \gls{Linux} had deviations in the scale of 0.3.
+A reason for this was not found.
+The reason for the comparably low throughput over a network, however, was assumed to be the combination of the Netgear switch and a Cat 5 ethernet cable.
 
 This demonstrates that the application is sufficiently fast to be used in most use cases.
-Therefore later implementation of a feature of this solution to be used as a transport protocol (i.e. for \cite{rsync} - see \ref{ssec:Rsync}) is deemed viable.
+Therefore the feature of this solution to be used as a transport protocol (i.e. for \cite{rsync} - see \ref{ssec:Rsync}) is deemed viable.
 
 
 \section{Comparison}\label{sec:Comparison}
