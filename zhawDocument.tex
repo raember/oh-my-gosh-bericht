@@ -17,6 +17,7 @@
 \include{zhawSetup}
 
 \begin{document}
+\pagenumbering{Roman}
 
 \maketitle
 
@@ -41,7 +42,6 @@ All the usual work flows are possible on the \gls{shell} such as:
 \end{itemize}
 
 The solution relies on a number of \gls{Unix} specific technologies like \glspl{pty} and \gls{PAM}, which is used in \cite{login} as well, to realize its use cases.
-
 
 
 \chapter*{Preface}\label{sec:Preface}
@@ -74,6 +74,9 @@ Fortunately Dr. Neuhaus adapted those to fit a one-man project.
 
 \tableofcontents
 
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
 
 \chapter{Introduction}\label{chp:Introduction}
 % Nennt bestehende Arbeiten/Literatur zum Thema -> Literaturrecherche
@@ -218,7 +221,7 @@ This led to  the following general flow of actions:
 \item The server requests necessary environment variables from the client.
 \item The client responds with the values of said variables.
 \item The server initiates a \gls{login} procedure.
-\item The client authenticates himself (see \ref{sec:DesignAuthViaPw}).
+\item The client authenticates itself (see \ref{sec:DesignAuthViaPw}).
 \item The server gathers essential data about the logged in user (see \ref{sec:DesignUserDataQuerying}).
 \item The server performs the necessary post-\gls{login} actions that are expected in a \gls{Unix} environment (see \ref{sec:DesignLoginAccounting}).
 \item The server drops privilege to that of the logged in user (see \ref{sec:DesignPrivilegeSeparation}).
@@ -251,7 +254,7 @@ To prevent this, the communication can be encrypted with \gls{TLS} (originally k
 Today's state-of-the-art is \gls{TLS} 1.3 \citep{rfc8446}.
 
 When connecting, the client checks the server's \gls{X.509}-certificate to authenticate the peer.
-Optionally, the client can also authenticate himself to the server.
+Optionally, the client can also authenticate itself to the server.
 After this, the two start an encrypted channel by for example using the \gls{DiffieHellmanKX} or letting the server decrypt a random secret that has been encrypted with the servers public key.
 After this, every message can be transferred between client and server in an encrypted way.
 
@@ -417,7 +420,7 @@ Now, the work flow of the solution looks as follows (note that unchanged entries
 	\item The host does not find a public key that matches the client or the authentication with keys did not succeed.
 	\begin{enumerate}
 		\item The host starts an instance of \cite{login}, which asks the client to authenticate itself (see \ref{sec:ImplAuthViaPw}).
-		\item After successful \gls{login}, \cite{login} drops privileges, takes post-\gls{login} actions and starts a user \gls{login} \gls{shell}.
+		\item After successful \gls{login}, \cite{login} drops privileges, takes post-\gls{login} actions and starts the user's \gls{login} \gls{shell}.
 	\end{enumerate}
 \end{itemize}
 \item \textcolor{gray}{The client uses the \gls{shell} on remote machine.}
@@ -500,7 +503,7 @@ The most direct way to deal with this is to use \glspl{fd}, which can be passed 
 Getting a \texttt{net.Conn} interface from a \gls{fd} is supported in \gls{Go} via:
 \setlistingGo
 \begin{lstlisting}[caption={Getting a \texttt{net.Conn} interface from a \gls{fd}},label=lst:ConnFromFD]
-fd := uintptr(0) // Dummy fd
+fd := uintptr(0) // Dummy fd for context
 conn, err := net.FileConn(os.NewFile(fd, "conn"))
 if err != nil {
 	panic(err.String())
@@ -520,7 +523,7 @@ fd := file.Fd()
 However: Creating a connection with the high-level \gls{API} of \gls{Go} and handing over the \gls{fd} to the child to derive a \texttt{net.Conn} object from, fails.
 
 This had some implications for the project:
-The listener on the server could not be created with the high-level like:
+The listener on the server could not be created with high-level functions like:
 \setlistingGo
 \begin{lstlisting}[caption={\gls{Go}'s high level \gls{API} for listener},label=lst:ListenForConn]
 ln, err := net.Listen("tcp", ":8080")
@@ -537,9 +540,8 @@ for {
 \end{lstlisting}
 
 Instead the project had to rely on the low-level \gls{socket}.
-The \gls{x-package} \texttt{Unix} provides the necessary wrapper functions, which can be used instead.
-
-The obvious drawback being having to rely on a \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
+The \gls{x-package} \texttt{sys/unix} provides the necessary wrapper functions, which can be used instead.
+The obvious drawback being having to rely on an \gls{x-package} which is subject to change and not being able to use the higher-level methods which \textbf{are} part of the standard library.
 
 \subsection{Privilege Dropping}\label{ssec:PrivilegeDropping}
 To have a sensible privilege separation, the host process should drop the \texttt{root} privileges to the privileges of the logged in user.
@@ -549,13 +551,14 @@ Instead, it was relied upon spawning the \gls{shell} already with set \gls{UID} 
 This worked out well, as looking at the process in a process monitor like \texttt{htop} showed that the spawned \gls{shell} does have the right \gls{UID} and \gls{GID}.
 
 \subsection{Terminal Process Group}\label{ssec:TerminalProcessGroup}
-A \gls{login} \gls{shell} such as \texttt{bash} expects a properly set up the \gls{fd} with \cite{ioctl} properly.
-This can be done by letting the process set \texttt{ctty}.
+A \gls{login} \gls{shell} such as \texttt{bash} expects a properly set up \gls{fd} with \cite{ioctl}.
+This can be done by allowing the process to set \texttt{ctty}.
 However: Setting the corresponding flag when starting the process via \gls{Go} fails with an error.
-The solution omits this step, which shows in \texttt{bash} printing the following:
+The solution does not contain a solution for this problem.
+This shows when starting a \gls{login} \gls{shell} like \texttt{bash}, which prints the following:
 
 \setlistingBash
-\begin{lstlisting}[caption={\texttt{bash} error when starting \gls{shell} without the \texttt{setctty} flag},label=lst:BashIoctlError]
+\begin{lstlisting}[caption={\texttt{bash} error when starting \gls{shell} without the \texttt{setctty} flag},label=lst:BashIoctlError,deletekeywords={set,for}]
 bash: cannot set terminal process group (-1): Inappropriate ioctl for device
 bash: no job control for this shell
 \end{lstlisting}
@@ -589,19 +592,19 @@ However, \gls{login} using \gls{PAM} failed on one of the test environments (nam
 After some trial and error, switching to \cite{login} solved said issue, even though this command also uses \gls{PAM}.
 This came with additional desired features like the \gls{login}-accounting and other post-\gls{login} actions (see \ref{sec:DesignLoginAccounting} and \ref{ssec:DesignLoginAccountingWithPAM}), which the command already covers.
 After roughly a month of switching to \cite{login}, the \gls{login} procedure failed again on said environment.
-This occurred in a later stage of the project and it was deemed to time consuming, returning to the old implementation, which still lacked \gls{login} accounting.
+This occurred in a later stage of the project and it was deemed too time consuming, returning to the old implementation, which still lacked \gls{login} accounting.
 Fortunately this only affected one of the environments:
 The other environments (i.e. \gls{WSL}) were still functioning.
 
 \section{Authentication via Keys}\label{sec:ImplAuthViaKeys}
-A user can also authenticate himself without a password but instead using public key cryptography.
+A user can also authenticate itself without a password but instead using public key cryptography.
 For this, a user has to create a key pair consisting of a private and a public key.
 Before the actual authentication, a hashed version of the public key has to be stored on the server.
 
-When starting an authentication, the user sends his public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication.
+When starting an authentication, the user sends the public key to the server, which compares its hash with the stored keys that are deemed permissible for authentication.
 If it matches, the server encrypts a random secret (with high entropy) with the public key to the user.
-The user decrypts the message with his private key and sends it back to the server.
-If the returned secret matches the original secret, the user proved that he is the legitimate owner of the public key.
+The user decrypts the message with the private key and sends it back to the server.
+If the returned secret matches the original secret, the user proved that it is the legitimate owner of the public key.
 
 This authentication is sufficiently secure from third parties which do not have access to the private key of the user, as it can prove the authenticity of a user.
 
@@ -611,8 +614,8 @@ The first change was to store the public key in a plain text format, which was d
 Not storing the hashed public key does not pose any security threat, so fixing this deviation was deemed of low priority.
 
 The second and last alteration was to have the structure of authorized keys on the server be stored exclusively in the \texttt{root} user's home directory.
-This is a sub-optimal approach, as his requires users to store their public keys in the super user's directory, which can lead to mistakes.
-This will be fixed in the future.
+This is a sub-optimal approach, as this requires users to store their public keys in the super user's directory, which can lead to mistakes.
+This would be fixed in future works.
 
 To test the application, a test user was created and given a key pair which was created as follows using \cite{openssl}:
 
@@ -632,6 +635,7 @@ This was deemed incomplete, as a system can acknowledge users that are not liste
 An example of this is \gls{NIS} or \gls{LDAP}, which would not be covered by solely relying on the \texttt{passwd} file.
 
 In later stages, this has been corrected by switching to using \gls{CGo} and calling the \gls{Unix} \gls{API} routines \cite{getpw} as described in section \ref{sec:DesignUserDataQuerying}.
+The reason for using \gls{CGo} is that the \texttt{sys/unix} package does not have a wrapper function for \cite{getpw}.
 
 \setlistingC
 \begin{lstlisting}[caption={Definition of passwd and {\cite{getpw}}},label=lst:PasswdDefinition]
@@ -669,7 +673,7 @@ cmd.SysProcAttr = &syscall.SysProcAttr{
 cmd.Env = []string{"TERM=xterm-256color"}
 \end{lstlisting}
 
-The transfer of the \gls{SIGWINCH} has not been realized in this project however.
+The transfer of the \gls{SIGWINCH} has not been realized in this project because of the lack of time in the later stages of the project.
 
 
 \section{Login Accounting}\label{sec:ImplLoginAccounting}
@@ -682,7 +686,7 @@ To achieve this, the client-side \gls{terminal} has to be set from the default \
 This sends each key stroke to the server-side \gls{shell} as is.
 After the termination of the session, the original \texttt{cooked}-mode has to be restored to ensure operation as per usual.
 
-Setting the \gls{terminal} mode as described above in \gls{Go} can be achieved with the functionality of the x-package ``\texttt{golang.org/x/crypto/ssh/terminal}'':
+Setting the \gls{terminal} mode as described above in \gls{Go} can be achieved with the functionality of the \gls{x-package} ``\texttt{golang.org/x/crypto/ssh/terminal}'':
 \setlistingGo
 \begin{lstlisting}[caption={Setting the \gls{terminal} mode in \gls{Go}},label=lst:GoTermMode]
 import "golang.org/x/crypto/ssh/terminal"
@@ -788,7 +792,7 @@ sudo systemctl disable goshd.service
 % (Zusammenfassung der Resultate)
 \begin{figure}[ht]
 \includegraphics[width=\textwidth]{ohmygosh}
-\caption{Screenshot of \texttt{gosh} (right) connecting to the local \texttt{goshd} (left) server.}
+\caption{Screenshot of \texttt{gosh} (top) connecting to the local \texttt{goshd} (bottom) server.}
 \label{fig:OhMyGoshScrot}
 \end{figure}
 
@@ -799,7 +803,7 @@ It takes the following arguments:
 \begin{itemize}
 \item \texttt{--help}: Displays the help text.
 \item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
-\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{\textasciitilde{}/.gosh}'').
 \item \textit{string}: An optional address with optional credentials (defaults to \texttt{localhost}).
 \end{itemize}
 \item \texttt{goshd} is the \gls{daemon} on the server side that awaits incoming requests.
@@ -807,7 +811,7 @@ It takes the following arguments:
 \begin{itemize}
 \item \texttt{--help}: Displays the help text.
 \item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
-\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{\textasciitilde{}/.gosh}'').
 \item \texttt{--cert}: Sets the path of the server certificate (defaults to ``\texttt{/etc/gosh/certifi\linebreak{}cate.pem}'').
 \item \texttt{--key}: Sets the path of the server key file (defaults to ``\texttt{/etc/gosh/key.pem}'').
 \end{itemize}
@@ -816,7 +820,7 @@ This binary is only executed by the server and takes the following arguments:
 \begin{itemize}
 \item \texttt{--help}: Displays the help text.
 \item \texttt{--conf}: Sets the path where the configuration file is stored (defaults to ``\texttt{/etc/gosh}'').
-\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{~/.gosh}'').
+\item \texttt{--auth}: Sets the path where the key pair is stored (defaults to ``\texttt{\textasciitilde{}/.gosh}'').
 \item \texttt{--cert}: Sets the path of the server certificate (defaults to ``\texttt{/etc/gosh/certifi\linebreak{}cate.pem}'').
 \item \texttt{--key}: Sets the path of the server key file (defaults to ``\texttt{/etc/gosh/key.pem}'').
 \item \texttt{--remote}: Sets the address of the peer (defaults to ``\texttt{localhost:2222}'').
@@ -828,13 +832,13 @@ To configure the applications, the client side has a configuration file called \
 The server's configuration file is called \texttt{goshd\_config.toml} respectively, where both \texttt{goshd} and \texttt{goshh} refer to the same file.
 In it, the user can specify the following parameters and a few more:
 \begin{itemize}
-\item The default port to communicate over.
-\item The default log level.
-\item The location of the authorized keys.
-\item The maximum amount of allowed sessions (server-side only).
+\item The default port to communicate over (2222).
+\item The default log level (info).
+\item The location of the authorized keys (\texttt{\textasciitilde{}/.gosh}).
+\item The maximum amount of allowed sessions (server-side only) (10).
 \end{itemize}
 
-The project allows a user to connect to a server and enter an interactive session with a remote user's \gls{login} \gls{shell} (see \ref{sec:ImplTerminalMode}, \ref{sec:ImplAuthViaPw}, \ref{sec:ImplAuthViaKeys}, \ref{sec:ImplPseudoterminal} and \ref{sec:ImplLoginAccounting}).
+The project allows a user to connect to a server and enter an interactive session with a remote user's \gls{login} \gls{shell} (see \ref{sec:ImplAuthViaPw}, \ref{sec:ImplAuthViaKeys}, \ref{sec:ImplLoginAccounting}, \ref{sec:ImplTerminalMode} and \ref{sec:ImplPseudoterminal}).
 On the server side an appropriate privilege separation is performed upon user \gls{login} (see \ref{sec:DesignPrivilegeSeparation} and \ref{sec:Problems}).
 The communication is secured in the beginning of the transaction using \gls{TLS} (see \ref{sec:ImplSecureConnection}).
 
@@ -842,7 +846,7 @@ To test the applications, the user can execute the binaries from within the root
 To do this, the user can make use of the \gls{CLI} flags described above to redirect the dependencies to the test files in the project:
 \setlistingBash
 \begin{lstlisting}[caption={Running the applications for test purposes},label=lst:RunProject,deletekeywords={test}]
-# Setup environment: Create test user, its home directory and the login shell.
+# Setup environment: Create test user, its home directory and set the login shell.
 ./scripts/setup.sh
 
 # Start the server
@@ -896,8 +900,7 @@ The implementation differs from the original design however, which is also discu
 
 \item \textbf{An evaluation of the performance of the implemented solution}
 
-% TODO: Write more
-An explanation to this task can be found at subsection \ref{sec:Performance}.
+An elaboration to this task can be found at subsection \ref{sec:Performance}.
 
 \item \textbf{A privilege-separation architecture}
 
@@ -909,12 +912,12 @@ In the following lists, there are additional tasks described in section \ref{sec
 \begin{itemize}
 \item \textbf{A comparison of all the related work with the envisaged solution, outlining why the envisaged solution is better}
 
-A small comparison to the surveyed solutions can be found in section \ref{sec:Comparison}.
+A comparison to the surveyed solutions can be found in section \ref{sec:Comparison}.
 
 \item \textbf{A detailed analysis of the security of the solution, including
 possible attacks and defenses}
 
-This task will be cleared later in this chapter: The section \ref{sec:Security} clears this task.
+This task has been cleared in section \ref{sec:Security}.
 
 \item \textbf{Use of TLS as the transport layer}
 
@@ -1092,7 +1095,7 @@ There is no reason to allow any client to try to log in as \texttt{root} user.
 Especially since a logged in user can simply use \texttt{su} or \texttt{sudo} to gain \texttt{root} privileges.
 ``\texttt{root}'' however is the only user name that can be logged in and an attacker knows exists and only needs the knowledge of one password (which \textit{could} be a default password) to gain full system control.
 
-Another way to prevent \texttt{root} user login despite the usage of \cite{login} could be to pre-fetch the user credentials from the client (see \ref{ssec:PrefetchingOfCredentials}).
+Another way to prevent \texttt{root} user login despite the usage of \cite{login} could be to pre-fetch the user credentials from the client and use the \texttt{-f} flag with \cite{login} (see \ref{ssec:PrefetchingOfCredentials}).
 
 \subsubsection{Authentication via Keys}\label{sssec:SecAuthViaKeys}
 When authenticating a user via public key cryptography, the server looks up which users can be logged in.
@@ -1110,7 +1113,7 @@ Such privilege escalation should be prevented but was not entirely achieved in t
 
 
 \section{Prospects}\label{sec:Prospects}
-Although the project created a working alternative to \gls{SSH}, there are several points that have to be improved, which couldn't be completed in the course of this thesis.
+Although the project created a working alternative to \gls{SSH}, there are several points that have to be improved, which could not be completed in the course of this thesis.
 These points are listed here:
 
 \subsection{Security Issues}\label{ssec:SecurityIssues}
@@ -1148,6 +1151,10 @@ This sometimes leads to an unclean session breakdown when terminating.
 It is therefore desirable to implement the data forwarding with other means.
 Possible \gls{Linux} support could be drawn from the functions \cite{select} or \cite{poll}.
 
+\subsection{Terminal Process Group}\label{ssec:ProspectTerminalProcessGroup}
+As described in section \ref{ssec:TerminalProcessGroup}, the \gls{shell} process does not have the ability to set the terminal process group.
+This is a flaw in the solution that should be removed by properly allowing the process to do so.
+
 
 \chapter{Index}\label{chp:Index}
 \bibliography{reference}\label{sec:Bibliography}
@@ -1180,7 +1187,7 @@ Possible \gls{Linux} support could be drawn from the functions \cite{select} or 
 \includepdf[pages=-,landscape=true]{zhawGanttDiagram.pdf}
 \subsection{Meeting Minutes}\label{ssec:MeetingMinutes}
 The meeting minutes have a disruption in style and execution beginning from the 6th meeting.
-Reason for this is because in the beginning of the project, Mr Schwarz was responsible for keeping the minutes, but he opted out of the project.
+The reason for this is because in the beginning of the project, Mr Schwarz was responsible for keeping the minutes, but he opted out of the project.
 \includepdf[pages=-]{minutes/2nd_Meeting.pdf}
 \includepdf[pages=-]{minutes/3rd_Meeting.pdf}
 \includepdf[pages=-]{minutes/4th_Meeting.pdf}
