@@ -1,0 +1,96 @@
+
+%% Offizielle ZHAW Farben
+\definecolor{ZHAWblue}{cmyk}{1,0.45,0,0.14}
+\definecolor{ZHAWSoE}{cmyk}{0,1,0.65,0.15}
+
+\definecolor{ZHAWlightyellow}{cmyk}{0,0.08,0.35,0.1}
+\definecolor{ZHAWdarkyellow}{cmyk}{0,0.28,1,0.06}
+\definecolor{ZHAWlightgreen}{cmyk}{0.57,0,1,0}
+\definecolor{ZHAWdarkgreen}{cmyk}{1,0,0.91,0.42}
+\definecolor{ZHAWcoolgrey}{cmyk}{0,0.01,0,0.51}
+\definecolor{ZHAWpurple}{cmyk}{0.67,1,0.3,0.1}
+\definecolor{ZHAWdarkgrey}{cmyk}{0.33,0.04,0,0.72}
+\definecolor{ZHAWred}{cmyk}{0,0.79,1,0.11}
+
+
+\usetheme{Rochester}
+
+% Schrift und Farbdefinitionen
+\setbeamercolor{frametitle}{fg=white,bg=ZHAWblue}
+\setbeamercolor{structure}{fg=ZHAWblue}
+\setbeamercolor{alerted text}{fg=ZHAWred}
+\setbeamercolor{example text}{fg=ZHAWdarkgreen}
+\setbeamercolor{title page}{fg=white,bg=ZHAWblue}
+\setbeamercolor{footline}{fg=ZHAWcoolgrey}
+\setbeamerfont{title}{size=\Large,series=\bfseries}
+\setbeamerfont{lecture}{size=\Huge,series=\bfseries}
+\setbeamerfont{author}{size=\normalsize,series=\mdseries}
+\setbeamerfont{date}{size=\small,series=\mdseries}
+\setbeamerfont{part}{size=\huge,series=\bfseries}
+
+\setbeamercolor{block title}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor{block title alerted}{use=alerted text,fg=white,bg=alerted text.fg!75!black}
+\setbeamercolor{block title example}{use=example text,fg=white,bg=example text.fg!75!black}
+
+\setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+\setbeamercolor{block body alerted}{parent=normal text,use=block title alerted,bg=block title alerted.bg!10!bg}
+\setbeamercolor{block body example}{parent=normal text,use=block title
+  example,bg=block title example.bg!10!bg}
+
+\setbeamersize{text margin left=5mm,text margin right=5mm}
+
+%\pgfdeclareimage[height=.1\paperheight]{zhawlogo}{images/logos/InIT/en/en-zhaw-init-negativ}
+\logo{\includegraphics[trim=0 0 152 28,clip,width=10mm]{images/logos/InIT/en/en-zhaw-init-rgb}\hspace{2mm}}
+
+\setbeamertemplate{part page}{
+  \begingroup
+  \setbeamercolor{background canvas}{fg=white,bg=ZHAWblue}
+  \setbeamertemplate{footline}{}
+  
+  \begin{frame}
+    \vspace{15mm}
+    \usebeamercolor{title}\usebeamercolor[fg]{title}
+    \usebeamerfont{title}\inserttitle\\[5mm]
+    \LARGE Teil~\insertpartnumber\\
+    \usebeamerfont{part}\insertpart\\[5mm]
+    \usebeamerfont{date}\insertdate\\[17mm]
+    \usebeamerfont{author}\parbox{20mm}{\raggedright\insertauthor}
+  \end{frame}
+\endgroup
+}
+
+\AtBeginPart{
+  \partpage
+}
+
+\setbeamertemplate{frametitle}{
+  \vspace*{-1pt}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=14mm,leftskip=3mm,rightskip=0mm]{frametitle}
+    \vspace*{0mm}
+    \parbox[m]{.8\textwidth}{\strut\insertframetitle\\ {\small \insertframesubtitle}}%
+    \hfill\parbox[m]{.1\textwidth}{\includegraphics[trim=0 0 152 28,clip,height=10mm]{images/logos/InIT/en/en-zhaw-init-negativ}}
+    \vspace{1mm}
+  \end{beamercolorbox}
+}
+
+\setbeamertemplate{headline}{}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[text line]{}
+
+\newenvironment{Anmerkung}[1][Anmerkung]{
+  \structure{#1:~}\ignorespaces
+}{}
+\newenvironment{Anmerkungen}[1][Anmerkungen]{
+  \structure{#1:~}\ignorespaces
+}{}
+
+\newcommand*{\term}[1]{\textbf{#1}}
+
+\let\Gamma\varGamma
+\let\Sigma\varSigma
+\let\Theta\varTheta
+\let\Lambda\varLambda
+\let\Pi\varPi
+\let\Phi\varPhi
+\let\Omega\varOmega
