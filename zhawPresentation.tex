@@ -1,6 +1,6 @@
 \documentclass[
 	xcolor=dvipsnames,
-%	handout
+	handout
 ]{beamer}
 
 \usetheme{zhaw}
@@ -22,6 +22,7 @@
 \usepackage{synttree}
 \usepackage{listings}
 \usepackage{multicol}
+\usepackage{nopageno}
 
 \definecolor{gray_ulisses}{gray}{0.55}
 \definecolor{castanho_ulisses}{rgb}{0.71,0.33,0.14}
@@ -77,7 +78,7 @@
 }
 
 \newenvironment{zhawframe}[1][]
-{\begin{frame}[environment=fr,#1]{\insertsectionhead}{\insertsubsectionhead}}
+{\begin{frame}[environment=fr,#1]{\insertsubsectionhead}{\insertsectionhead}}
 {\end{frame}
 }
 
@@ -99,132 +100,115 @@
 
 \section{Introduction}
 \begin{zhawframe}
-Task:
-\begin{itemize}
-\item<1-> Alternative to SSH (core function)
-\item<2-> Prototype (design \& implementation)
-\item<3-> Target platform: GNU/Linux
-\item<4-> Implementation language: Go (Golang)
-\end{itemize}
+\onslide<1-> Design and implement an alternative to SSH (prototype)
+
+\onslide<2-> Implementation language: Go (Golang)
+
+\onslide<3-> Target platform: GNU/Linux
 \end{zhawframe}
 
 \section{Precursory Works}
 \subsection{Telnet}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> telnet(1)
-\item<2-> Old \onslide<3->(RFC15 1969, RFC854 1983)
-\item<4-> Port 23
-\item<5-> No secure connection \onslide<6->(TELNETS)
-\item<7-> Go-Telnet
-\end{itemize}
+\onslide<1-> telnet(1) is old (RFC15 1969, RFC854 1983)
+
+\onslide<2-> No secure connection (except: TELNETS)
+
+\onslide<3-> "Go-Telnet"
 \end{zhawframe}
 
 \subsection{Berkeley \texttt{r}-Commands}
 \begin{zhawframe}
-Frequently used Linux commands:
+Frequently used Linux commands made into \texttt{r}-Commands:
 \begin{itemize}
-\item \texttt{login}(1)
-\item \texttt{sh}(1)/\texttt{bash}(1)
-\item \texttt{cp}(1)
-\item \texttt{who}(1)
-\item \texttt{stat}(1)
-\item \texttt{uptime}(1)
+\item \texttt{login}(1) $\Rightarrow$ \texttt{rlogin}(1)
+\item \texttt{sh}(1)/\texttt{bash}(1) $\Rightarrow$ \texttt{rsh}(1)/\texttt{rexec}(1)*
+\item \texttt{cp}(1) $\Rightarrow$ \texttt{rcp}(1)
+\item \texttt{who}(1) $\Rightarrow$ \texttt{rwho}(1)
+\item \texttt{stat}(1) $\Rightarrow$ \texttt{rstat}(1)
+\item \texttt{uptime}(1) $\Rightarrow$ \texttt{ruptime}(1)
 \end{itemize}
-\end{zhawframe}
-
-\begin{zhawframe}
-\begin{itemize}
-\item<1-> \texttt{rlogin}(1)
-\item<2-> \texttt{rsh}(1)
-\item<3-> \texttt{rexec}(1)*
-\item<4-> \texttt{rcp}(1)
-\item<5-> \texttt{rwho}(1)
-\item<6-> \texttt{rstat}(1)
-\item<7-> \texttt{ruptime}(1)
-\end{itemize}
-\end{zhawframe}
-
-\begin{zhawframe}
-\begin{itemize}
-\item<1-> Useful (scripts)
-\item<2-> No secure connection
-\end{itemize}
+Useful (especally for scripts), but no secure connection
 \end{zhawframe}
 
 \subsection{OpenSSH}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Replaces telnet(1) and Berkeley \texttt{r}-commands
-\item<2-> Port 22
-\item<3-> Secure connection (own protocol)
-\item<4-> Plethora of features:
+\onslide<1-> Replaces telnet(1) and Berkeley \texttt{r}-commands
+
+\onslide<2-> Secure connection (own protocol)
+
+\onslide<3-> Plethora of features:
 	\begin{itemize}
-	\item Remote user login
-	\item Auth via keys
-	\item Port forwarding
-	\item X11-forwarding
-	\item Auth agent connection forwarding (!)
-	\item Compression (used by \texttt{rsync}(1))
+	\item<3-> Remote user login
+	\item<3-> Auth via keys
+	\item<3-> Port forwarding
+	\item<3-> X11-forwarding
+	\item<3-> Auth agent connection forwarding (!)
+	\item<3-> Compression (used by \texttt{rsync}(1))
 
 	\hspace{3mm}$\vdots$
 	\end{itemize}
-\end{itemize}
 \end{zhawframe}
 
 \section{Oh-My-Gosh}
 \subsection{Secure Connection}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Prevent MITM, provide integrity \& privacy
-\item<2-> TLS 1.3
-\item<3-> Server: \texttt{openssl}(1) $\rightarrow$ key \& X.509 certificate
-\item<4-> \texttt{crypto/tls}
-\item<5-> Encrypted channel
-\item<6-> Self signed server certificate: Ignores trust chain
-\item<7-> No client certificates (!) \onslide<8->$\rightarrow$ Cannot authenticate the connecting client
-\end{itemize}
+\onslide<1-> Prevent MITM, provide integrity \& privacy
+
+\onslide<2-> TLS 1.3
+
+\onslide<3-> Server: \texttt{openssl}(1) $\rightarrow$ key \& X.509 certificate
+
+\onslide<4-> \texttt{crypto/tls}
+
+\onslide<5-> Encrypted channel
+
+\onslide<6-> Self signed server certificate: Ignores trust chain
+
+\onslide<7-> No client certificates (!) \onslide<8->$\rightarrow$ Cannot authenticate the connecting client
 \end{zhawframe}
 
 \subsection{Authentication via Password}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> \texttt{/etc/passwd} (!)
-\item<2-> PAM
-\item<3-> No Go-package for PAM
-\item<4-> Failure in test environment $\rightarrow$ \texttt{login}(1)
-\item<5-> Failure in same environment using \texttt{login}(1)
+\onslide<1-> \texttt{/etc/passwd} (!)
 
-Too time consuming to switch back
-\item<6-> \texttt{login}(1) allows root login
-\item<7-> Prefetch credentials on client
-\end{itemize}
+\onslide<2-> PAM
+
+\onslide<3-> No Go-package for PAM
+
+\onslide<4-> Failure in test environment $\rightarrow$ \texttt{login}(1)
+
+\onslide<5-> Failure in same environment using \texttt{login}(1)
+
+\onslide<5-> Too time consuming to switch back
+
+\onslide<6-> \texttt{login}(1) allows root login
+
+\onslide<7-> Prefetch credentials on client
 \end{zhawframe}
 
 \subsection{Authentication via Keys}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Public key cryptography
-\item<2-> Client $\leftrightarrow$ Server
-\item<3-> Random, high entropy secret
-\item<4-> Store authorized public keys on server
-\item<5-> \texttt{openssl}(1)
-\item<6-> Authorized keys stored in \texttt{/root/.gosh} (plain-text)
+\onslide<1-> Authenticate via public key cryptography
 
-\onslide<7->$\rightarrow$ Hash in \texttt{\textasciitilde{}/.gosh/authorized\_{}keys}
+\onslide<2-> Store authorized public keys on server
 
-\onslide<8->$\rightarrow$ Important for privilege separation
-\end{itemize}
+\onslide<3-> Authorized keys stored in \texttt{/root/.gosh} (plain-text)
+
+\onslide<4->$\quad\rightarrow$ Hash in \texttt{\textasciitilde{}/.gosh/authorized\_{}keys}
+
+\onslide<5->$\quad\rightarrow$ Important for privilege separation
 \end{zhawframe}
 
 \subsection{Privilege Separation}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Shell should run with appropriate permissions
-\item<2-> \texttt{setuid}(2) \& \texttt{setgid}(2)
-\item<3-> Failure to drop privileges after login (operation not supported) \onslide<4-> Thank you, Go \onslide<5->$\rightarrow$ spawn shell with appropriate UID \& GID
-\item<6-> SSH more sophisticated
-\end{itemize}
+\onslide<1-> Shell should run with appropriate permissions (\texttt{setuid}(2)/\texttt{setgid}(2))
+
+\onslide<2-> Failure to drop privileges after login (operation not supported)
+
+\onslide<4-> $\quad$ Thank you, Go \onslide<5->$\rightarrow$ spawn shell with appropriate UID \& GID
+
+\onslide<6-> SSH more sophisticated
 \end{zhawframe}
 
 \begin{zhawframe}
@@ -253,46 +237,21 @@ Too time consuming to switch back
 
 \subsection{Login Accounting}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Not implemented, \textbf{but}
-\item<2-> \texttt{utmpx} $\rightarrow$ \texttt{w}/\texttt{who}
-\item<3-> PAM: \texttt{pam\_{}open\_{}session}(3)/\texttt{pam\_{}close\_{}session}(3)
-\end{itemize}
+\onslide<1-> Not implemented, \textbf{but}
+
+\onslide<2-> \texttt{utmpx} $\rightarrow$ \texttt{w}/\texttt{who}
+
+\onslide<3-> PAM: \texttt{pam\_{}open\_{}session}(3)/\texttt{pam\_{}close\_{}session}(3)
 \end{zhawframe}
 
 \subsection{User Data Acquisition}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Home directory, shell, UID \& GID
-\item<2-> Go standard library incomplete (misses shell information)
-\item<3-> \texttt{/etc/passwd} (!)
-\item<4-> CGO: \texttt{getpwnam}(2)/\texttt{getpwuid}(2)
-\end{itemize}
+\onslide<1-> Home directory, shell, UID \& GID
+
+\onslide<2-> Go standard library incomplete (misses shell information)
+
+\onslide<3-> \texttt{/etc/passwd} (!) $\Rightarrow$ CGO: \texttt{getpwnam}(2)/\texttt{getpwuid}(2)
 \end{zhawframe}
-
-\begin{frame}[fragile]{\insertsectionhead}{\insertsubsectionhead}
-\lstset{
-	style = basestyle,
-	language = C,
-}
-\begin{lstlisting}
-#include <sys/types.h>
-#include <pwd.h>
-
-struct passwd {
-    char   *pw_name;       /* username */
-    char   *pw_passwd;     /* user password */
-    uid_t   pw_uid;        /* user ID */
-    gid_t   pw_gid;        /* group ID */
-    char   *pw_gecos;      /* user information */
-    char   *pw_dir;        /* home directory */
-    char   *pw_shell;      /* shell program */
-};
-
-struct passwd *getpwnam(const char *name);
-struct passwd *getpwuid(uid_t uid);
-\end{lstlisting}
-\end{frame}
 
 \subsection{Pseudoterminals}
 \begin{zhawframe}
@@ -317,155 +276,94 @@ Overview
 \end{zhawframe}
 
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> \texttt{istty}(3) on the connected \texttt{fd}s
-\item<2-> \texttt{posix\_{}openpt("/dev/ptmx")}(3) $\rightarrow$ \texttt{grant\_{}pt}(3) $\rightarrow$ \texttt{unlockpt}(3) $\rightarrow$ \texttt{ptsname}(3)
-\item<3-> Wrapper function in internal(!) package of the Go standard library \texttt{os/signal/internal/pty}
-\end{itemize}
-\end{zhawframe}
+\onslide<1-> \texttt{istty}(3) on the connected \texttt{fd}s
 
-\begin{frame}[fragile]{\insertsectionhead}{\insertsubsectionhead}
-\lstset{
-	style = basestyle,
-	language = Golang,
-}
-\begin{lstlisting}
-// Open returns a master pty and the name of the linked slave tty.
-func Open() (master *os.File, slave string, err error) {
-    m, err := C.posix_openpt(C.O_RDWR)
-    if err != nil {
-        return nil, "", ptyError("posix_openpt", err)
-    }
-    if _, err := C.grantpt(m); err != nil {
-        C.close(m)
-        return nil, "", ptyError("grantpt", err)
-    }
-    if _, err := C.unlockpt(m); err != nil {
-        C.close(m)
-        return nil, "", ptyError("unlockpt", err)
-    }
-    slave = C.GoString(C.ptsname(m))
-    return os.NewFile(uintptr(m), "pty-master"), slave, nil
-}
-\end{lstlisting}
-\end{frame}
+\onslide<2-> \texttt{posix\_{}openpt("/dev/ptmx")}(3) $\rightarrow$ \texttt{grant\_{}pt}(3) $\rightarrow$ \texttt{unlockpt}(3) $\rightarrow$ \texttt{ptsname}(3)
+
+\onslide<3-> Wrapper function in internal(!) package of the Go standard library \texttt{os/signal/internal/pty}
+\end{zhawframe}
 
 \subsection{Starting the Shell}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Shell requirements:
+\onslide<1-> Shell requirements:
+
 	\begin{itemize}
 	\item user (UID \& GID) \& host name
 	\item \texttt{TERM} env var (for \texttt{ncurses}(3X))
 	\item window resolution (including \texttt{SIGWINCH})
 	\item session leader (controlling terminal)
 	\end{itemize}
-\item<2-> Transfer of env vars (client $\leftrightarrow$ server)
-\item<3-> Continuous transfer of \texttt{SIGWINCH} not implemented $\rightarrow$ prospects
-\end{itemize}
-\end{zhawframe}
+	
+\onslide<2-> Transfer of env vars (client $\leftrightarrow$ server)
 
-\begin{frame}[fragile]{\insertsectionhead}{\insertsubsectionhead}
-\lstset{
-	style = basestyle,
-	language = Golang,
-}
-\begin{lstlisting}
-cmd := exec.Command(pwd.Shell, "--login")
-cmd.SysProcAttr = &syscall.SysProcAttr{
-    Setsid: true,
-    //Setctty: true,
-    Credential: &syscall.Credential{
-        Uid: pwd.Uid,
-        Gid: pwd.Gid,
-    },
-}
-cmd.Env = userEnvs
-\end{lstlisting}
-\onslide<2-> Setting \texttt{CTTY} flag (for controlling terminal) fails $\rightarrow$ prospects
-\end{frame}
+\onslide<3-> Continuous transfer of \texttt{SIGWINCH} not implemented $\rightarrow$ prospects
+
+\onslide<4-> Setting \texttt{CTTY} flag (for controlling terminal) fails $\rightarrow$ prospects
+\end{zhawframe}
 
 \subsection{Terminal Mode}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Forward all keystrokes without interpretation (client-sside)
-\item<2-> \texttt{cooked} mode $\rightarrow$ \texttt{raw} mode
-\item<3-> x-package (!) \texttt{x/crypto/ssh/terminal}
-\end{itemize}
-\end{zhawframe}
+\onslide<1-> Forward all keystrokes without interpretation (client-sside)
 
-\begin{frame}[fragile]{\insertsectionhead}{\insertsubsectionhead}
-\lstset{
-	style = basestyle,
-	language = Golang,
-}
-\begin{lstlisting}
-import "golang.org/x/crypto/ssh/terminal"
-//...
-oldState, err := terminal.MakeRaw(0)
-if err != nil {
-    panic(err)
-}
-defer terminal.Restore(0, oldState)
-\end{lstlisting}
-\end{frame}
+\onslide<2-> \texttt{cooked} mode $\rightarrow$ \texttt{raw} mode
+
+\onslide<3-> x-package (!) \texttt{x/crypto/ssh/terminal}
+\end{zhawframe}
 
 \section{Evaluation}
 \subsection{Performance}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> client \textcolor{green!60!blue}{$\leftrightarrow$} server $\leftrightarrow$ ptm $\leftrightarrow$ pts $\leftrightarrow$ shell
-\item<2-> \texttt{/dev/zero} $\rightarrow$ connection (client-side) $\rightarrow$ server $\rightarrow$ \texttt{pv -rabtW} $\rightarrow$ \texttt{/dev/null}
-\item<3-> TLS vs no TLS
-\end{itemize}
+\onslide<1-> client \textcolor{green!60!blue}{$\leftrightarrow$} server $\leftrightarrow$ ptm $\leftrightarrow$ pts $\leftrightarrow$ shell
+
+\onslide<2-> \texttt{/dev/zero} $\rightarrow$ connection (client-side) $\rightarrow$ server $\rightarrow$ \texttt{pv -rabtW} $\rightarrow$ \texttt{/dev/null}
+
+\onslide<3-> TLS vs no TLS
+
 \onslide<4->
 \begin{table}[ht]
 \centering
 \begin{tabular}{rcc}
-Throughput with:				& TLS (size)	& no TLS (size)\\
-								& MiB/s (GiB)	& MiB/s (GiB)\\\hline
-Arch Linux (loopback) 			& 427 (25.1)	& 1177.6 (69.0)\\
-WSL (loopback) 					& 69.7 (4.09)	& 116 (6.82)\\
-Arch Linux to WSL (ethernet*) 	& 85.1 (4.99)	& 83.7 (4.91)
+Throughput with:		& TLS (total)	& no TLS (size)\\\hline
+Linux 					& 427MiB/s (25.1GiB)	& 1177.6MiB/s (69.0GiB)\\
+WSL 					& 69.7MiB/s (4.09GiB)	& 116MiB/s (6.82GiB)\\
+Linux to WSL (eth*) 	& 85.1MiB/s (4.99GiB)	& 83.7MiB/s (4.91GiB)
 \end{tabular}
 \end{table}
-*: Netgear Switch \& Cat 5 ethernet cable
+\onslide<4-> *: Netgear Switch \& Cat 5 ethernet cable
 \end{zhawframe}
 
 \subsection{Comparison to Telnet}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> TLS vs plain text
-\item<2-> Key auth vs only password auth
-\end{itemize}
+\onslide<1-> TLS vs plain text
+
+\onslide<2-> Key auth vs only password auth
 \end{zhawframe}
 
 \subsection{Comparison to Berkeley \texttt{r}-commands}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Only \texttt{rlogin}(1) is considered (\texttt{rsh}(1))
-\item<2-> TLS vs plain text
-\item<3-> Key auth vs only password auth
-\item<4-> Password auth: Both use \texttt{login}(1)
-\end{itemize}
+\onslide<1-> Only \texttt{rlogin}(1) is considered (\texttt{rsh}(1))
+
+\onslide<2-> TLS vs plain text
+
+\onslide<3-> Key auth vs only password auth
 \end{zhawframe}
 
 \subsection{Comparison to OpenSSH}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> TLS vs own protocol
-\item<2-> Privilege separation
-\item<3-> Many additional features
-\end{itemize}
+\onslide<1-> TLS vs own protocol
+
+\onslide<2-> Privilege separation
+
+\onslide<3-> Many additional features
 \end{zhawframe}
 
 \section{Conclusion}
 \begin{zhawframe}
-\begin{itemize}
-\item<1-> Many problems encountered
-\item<2-> Many new concepts learned
-\item<3-> Mixed feelings
-\end{itemize}
+\onslide<1-> Many problems encountered
+
+\onslide<2-> Many new concepts learned
+
+\onslide<3-> Mixed feelings
 \end{zhawframe}
 
 \section{End}
