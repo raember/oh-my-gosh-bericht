@@ -91,14 +91,14 @@
 \begin{document}
 \maketitle
 
-\section*{Index}
-\begin{zhawframe}[shrink]
-\begin{multicols}{2}
-\tableofcontents
-\end{multicols}
-\end{zhawframe}
+%\section*{Index}
+%\begin{zhawframe}[shrink]
+%\begin{multicols}{2}
+%\tableofcontents
+%\end{multicols}
+%\end{zhawframe}
 
-\section{Introduction}
+\section{The Problem}
 \begin{zhawframe}
 \onslide<1-> Design and implement an alternative to SSH (prototype)
 
@@ -107,7 +107,7 @@
 \onslide<3-> Target platform: GNU/Linux
 \end{zhawframe}
 
-\section{Precursory Works}
+\section{The Present Solution}
 \subsection{Telnet}
 \begin{zhawframe}
 \onslide<1-> telnet(1) is old (RFC15 1969, RFC854 1983)
@@ -150,7 +150,7 @@ Useful (especally for scripts), but no secure connection
 	\end{itemize}
 \end{zhawframe}
 
-\section{Oh-My-Gosh}
+\section{My Solution}
 \subsection{Secure Connection}
 \begin{zhawframe}
 \onslide<1-> Prevent MITM, provide integrity \& privacy
@@ -310,7 +310,7 @@ Overview
 \onslide<3-> x-package (!) \texttt{x/crypto/ssh/terminal}
 \end{zhawframe}
 
-\section{Evaluation}
+\section{How It Turned Out}
 \subsection{Performance}
 \begin{zhawframe}
 \onslide<1-> client \textcolor{green!60!blue}{$\leftrightarrow$} server $\leftrightarrow$ ptm $\leftrightarrow$ pts $\leftrightarrow$ shell
@@ -357,7 +357,7 @@ Linux to WSL (eth*) 	& 85.1MiB/s (4.99GiB)	& 83.7MiB/s (4.91GiB)
 \onslide<3-> Many additional features
 \end{zhawframe}
 
-\section{Conclusion}
+\section{Afterthoughts}
 \begin{zhawframe}
 \onslide<1-> Many problems encountered
 
@@ -366,7 +366,7 @@ Linux to WSL (eth*) 	& 85.1MiB/s (4.99GiB)	& 83.7MiB/s (4.91GiB)
 \onslide<3-> Mixed feelings
 \end{zhawframe}
 
-\section{End}
+\subsection{End}
 \begin{zhawframe}
 Thank you for your attention!
 \end{zhawframe}
