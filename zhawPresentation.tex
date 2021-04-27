@@ -100,19 +100,19 @@
 
 \section{The Problem}
 \begin{zhawframe}
-\onslide<1-> Design and implement an alternative to SSH (prototype)
+\onslide<1-> Design and implement an alternative to \textcolor{red}{SSH} (prototype)
 
-\onslide<2-> Implementation language: Go (Golang)
+\onslide<2-> Implementation language: \textcolor{red}{Go} (Golang)
 
-\onslide<3-> Target platform: GNU/Linux
+\onslide<3-> Target platform: \textcolor{red}{GNU/Linux}
 \end{zhawframe}
 
 \section{The Present Solution}
 \subsection{Telnet}
 \begin{zhawframe}
-\onslide<1-> telnet(1) is old (RFC15 1969, RFC854 1983)
+\onslide<1-> \textcolor{red}{telnet(1) is old} (RFC15 1969, RFC854 1983)
 
-\onslide<2-> No secure connection (except: TELNETS)
+\onslide<2-> \textcolor{red}{No secure connection} (except: TELNETS)
 
 \onslide<3-> "Go-Telnet"
 \end{zhawframe}
@@ -121,21 +121,21 @@
 \begin{zhawframe}
 Frequently used Linux commands made into \texttt{r}-Commands:
 \begin{itemize}
-\item \texttt{login}(1) $\Rightarrow$ \texttt{rlogin}(1)
-\item \texttt{sh}(1)/\texttt{bash}(1) $\Rightarrow$ \texttt{rsh}(1)/\texttt{rexec}(1)*
-\item \texttt{cp}(1) $\Rightarrow$ \texttt{rcp}(1)
-\item \texttt{who}(1) $\Rightarrow$ \texttt{rwho}(1)
-\item \texttt{stat}(1) $\Rightarrow$ \texttt{rstat}(1)
-\item \texttt{uptime}(1) $\Rightarrow$ \texttt{ruptime}(1)
+\item \texttt{login}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}login}(1)
+\item \texttt{sh}(1)/\texttt{bash}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}sh}(1)/\texttt{\textcolor{red}{r}exec}(1)*
+\item \texttt{cp}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}cp}(1)
+\item \texttt{who}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}who}(1)
+\item \texttt{stat}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}stat}(1)
+\item \texttt{uptime}(1) $\Rightarrow$ \texttt{\textcolor{red}{r}uptime}(1)
 \end{itemize}
-Useful (especally for scripts), but no secure connection
+Useful (especally for scripts), but \textcolor{red}{no secure connection}
 \end{zhawframe}
 
 \subsection{OpenSSH}
 \begin{zhawframe}
 \onslide<1-> Replaces telnet(1) and Berkeley \texttt{r}-commands
 
-\onslide<2-> Secure connection (own protocol)
+\onslide<2-> \textcolor{red}{Secure connection} (own protocol)
 
 \onslide<3-> Plethora of features:
 	\begin{itemize}
@@ -153,7 +153,7 @@ Useful (especally for scripts), but no secure connection
 \section{My Solution}
 \subsection{Secure Connection}
 \begin{zhawframe}
-\onslide<1-> Prevent MITM, provide integrity \& privacy
+\onslide<1-> \textcolor{red}{Prevent MITM, provide integrity \& privacy}
 
 \onslide<2-> TLS 1.3
 
@@ -161,7 +161,7 @@ Useful (especally for scripts), but no secure connection
 
 \onslide<4-> \texttt{crypto/tls}
 
-\onslide<5-> Encrypted channel
+\onslide<5-> \textcolor{red}{Encrypted channel}
 
 \onslide<6-> Self signed server certificate: Ignores trust chain
 
@@ -172,11 +172,11 @@ Useful (especally for scripts), but no secure connection
 \begin{zhawframe}
 \onslide<1-> \texttt{/etc/passwd} (!)
 
-\onslide<2-> PAM
+\onslide<2-> \textcolor{red}{PAM}
 
 \onslide<3-> No Go-package for PAM
 
-\onslide<4-> Failure in test environment $\rightarrow$ \texttt{login}(1)
+\onslide<4-> Failure in test environment $\rightarrow$ \textcolor{red}{\texttt{login}(1)}
 
 \onslide<5-> Failure in same environment using \texttt{login}(1)
 
@@ -189,22 +189,22 @@ Useful (especally for scripts), but no secure connection
 
 \subsection{Authentication via Keys}
 \begin{zhawframe}
-\onslide<1-> Authenticate via public key cryptography
+\onslide<1-> Authenticate via \textcolor{red}{public key cryptography}
 
 \onslide<2-> Store authorized public keys on server
 
 \onslide<3-> Authorized keys stored in \texttt{/root/.gosh} (plain-text)
 
-\onslide<4->$\quad\rightarrow$ Hash in \texttt{\textasciitilde{}/.gosh/authorized\_{}keys}
+\onslide<4->$\quad\rightarrow$ \textcolor{red}{Hash in \texttt{\textasciitilde{}/.gosh/authorized\_{}keys}}
 
 \onslide<5->$\quad\rightarrow$ Important for privilege separation
 \end{zhawframe}
 
 \subsection{Privilege Separation}
 \begin{zhawframe}
-\onslide<1-> Shell should run with appropriate permissions (\texttt{setuid}(2)/\texttt{setgid}(2))
+\onslide<1-> Shell should run with \textcolor{red}{appropriate permissions} (\texttt{setuid}(2)/\texttt{setgid}(2))
 
-\onslide<2-> Failure to drop privileges after login (operation not supported)
+\onslide<2-> Failure to \textcolor{red}{drop privileges} after login (operation not \textcolor{red}{supported})
 
 \onslide<4-> $\quad$ Thank you, Go \onslide<5->$\rightarrow$ spawn shell with appropriate UID \& GID
 
@@ -222,13 +222,13 @@ Useful (especally for scripts), but no secure connection
 \begin{itemize}
 \item<1-> Server spawns child to handle connection
 \item<2-> \texttt{fork}(2)
-\item<3-> Go: No support for forking
+\item<3-> Go: \textcolor{red}{No support for forking}
 \item<4-> CGO fork fails
 \item<5-> \texttt{syscall.ForkExec}
 
 \onslide<6->$\rightarrow$ High level connection object gets corrupted
-\item<7-> Create host application
-\item<8-> Transfer \texttt{fd} as argument to child
+\item<7-> \textcolor{red}{Create host application}
+\item<8-> \textcolor{red}{Transfer \texttt{fd}} as argument to child
 
 \onslide<9->$\rightarrow$ Low level socket from \texttt{x/sys/unix} (x-package!)
 \item<10-> Prospect: Implement proper privilege separation
@@ -239,9 +239,9 @@ Useful (especally for scripts), but no secure connection
 \begin{zhawframe}
 \onslide<1-> Not implemented, \textbf{but}
 
-\onslide<2-> \texttt{utmpx} $\rightarrow$ \texttt{w}/\texttt{who}
+\onslide<2-> \textcolor{red}{\texttt{utmpx}} $\rightarrow$ \texttt{w}/\texttt{who}
 
-\onslide<3-> PAM: \texttt{pam\_{}open\_{}session}(3)/\texttt{pam\_{}close\_{}session}(3)
+\onslide<3-> \textcolor{red}{PAM}: \texttt{pam\_{}open\_{}session}(3)/\texttt{pam\_{}close\_{}session}(3)
 \end{zhawframe}
 
 \subsection{User Data Acquisition}
@@ -250,19 +250,19 @@ Useful (especally for scripts), but no secure connection
 
 \onslide<2-> Go standard library incomplete (misses shell information)
 
-\onslide<3-> \texttt{/etc/passwd} (!) $\Rightarrow$ CGO: \texttt{getpwnam}(2)/\texttt{getpwuid}(2)
+\onslide<3-> \texttt{/etc/passwd} (!) $\Rightarrow$ \textcolor{red}{CGO: \texttt{getpwnam}(2)/\texttt{getpwuid}(2)}
 \end{zhawframe}
 
 \subsection{Pseudoterminals}
 \begin{zhawframe}
-Shells expect to be connected to a TTY
+Shells expect to be connected to a \textcolor{red}{TTY}
 \begin{figure}[ht]
 \includegraphics[width=0.8\textwidth]{PseudoterminalProblem}
 \end{figure}
 \end{zhawframe}
 
 \begin{zhawframe}
-PTY fakes being a TTY
+\textcolor{red}{PTY} fakes being a TTY
 \begin{figure}[ht]
 \includegraphics[width=0.94\textwidth]{Pseudoterminal}
 \end{figure}
@@ -276,11 +276,11 @@ Overview
 \end{zhawframe}
 
 \begin{zhawframe}
-\onslide<1-> \texttt{istty}(3) on the connected \texttt{fd}s
+\onslide<1-> \textcolor{red}{\texttt{istty}(3)} on the connected \texttt{fd}s
 
 \onslide<2-> \texttt{posix\_{}openpt("/dev/ptmx")}(3) $\rightarrow$ \texttt{grant\_{}pt}(3) $\rightarrow$ \texttt{unlockpt}(3) $\rightarrow$ \texttt{ptsname}(3)
 
-\onslide<3-> Wrapper function in internal(!) package of the Go standard library \texttt{os/signal/internal/pty}
+\onslide<3-> \textcolor{red}{Wrapper function in} internal(!) package of the \textcolor{red}{Go standard library} \texttt{os/signal/internal/pty}
 \end{zhawframe}
 
 \subsection{Starting the Shell}
@@ -288,13 +288,13 @@ Overview
 \onslide<1-> Shell requirements:
 
 	\begin{itemize}
-	\item user (UID \& GID) \& host name
-	\item \texttt{TERM} env var (for \texttt{ncurses}(3X))
-	\item window resolution (including \texttt{SIGWINCH})
-	\item session leader (controlling terminal)
+	\item user (\textcolor{red}{UID \& GID}) \& host name
+	\item \textcolor{red}{\texttt{TERM}} env var (for \texttt{ncurses}(3X))
+	\item \textcolor{red}{window resolution} (including \texttt{SIGWINCH})
+	\item \textcolor{red}{session leader} (controlling terminal)
 	\end{itemize}
 	
-\onslide<2-> Transfer of env vars (client $\leftrightarrow$ server)
+\onslide<2-> \textcolor{red}{Transfer} of env vars (client $\leftrightarrow$ server)
 
 \onslide<3-> Continuous transfer of \texttt{SIGWINCH} not implemented $\rightarrow$ prospects
 
@@ -303,9 +303,9 @@ Overview
 
 \subsection{Terminal Mode}
 \begin{zhawframe}
-\onslide<1-> Forward all keystrokes without interpretation (client-sside)
+\onslide<1-> \textcolor{red}{Forward all keystrokes} without interpretation (client-sside)
 
-\onslide<2-> \texttt{cooked} mode $\rightarrow$ \texttt{raw} mode
+\onslide<2-> \texttt{cooked} mode $\rightarrow$ \textcolor{red}{\texttt{raw} mode}
 
 \onslide<3-> x-package (!) \texttt{x/crypto/ssh/terminal}
 \end{zhawframe}
@@ -326,7 +326,7 @@ Overview
 Throughput with:		& TLS (total)	& no TLS (size)\\\hline
 Linux 					& 427MiB/s (25.1GiB)	& 1177.6MiB/s (69.0GiB)\\
 WSL 					& 69.7MiB/s (4.09GiB)	& 116MiB/s (6.82GiB)\\
-Linux to WSL (eth*) 	& 85.1MiB/s (4.99GiB)	& 83.7MiB/s (4.91GiB)
+Linux to WSL (eth*) 	& \textcolor{red}{85.1MiB/s} (4.99GiB)	& \textcolor{red}{83.7MiB/s} (4.91GiB)
 \end{tabular}
 \end{table}
 \onslide<4-> *: Netgear Switch \& Cat 5 ethernet cable
